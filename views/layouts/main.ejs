@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> | Driving School SaaS</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* If a company is logged in, use their primary color, otherwise use default SaaS blue */
+            --primary-color: <%= (locals.tenant && tenant.primaryColor) ? tenant.primaryColor : '#2c3e50' %>;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="container">
+            <div class="nav-brand">
+                <a href="/" style="font-size: 1.4rem; letter-spacing: -1px;">
+                    DRIVE<strong>SAAS</strong>
+                </a>
+            </div>
+            <div class="nav-links">
+                <% if (locals.user) { %>
+                    <% if (user.role === 'SUPER_ADMIN') { %>
+                        <a href="/superadmin/dashboard">Global Admin</a>
+                    <% } else { %>
+                        <a href="<%= tenantUrl('/dashboard') %>">Dashboard</a>
+                    <% } %>
+                    <a href="/auth/logout" style="background: rgba(255,255,255,0.1); padding: 5px 15px; border-radius: 20px;">Logout</a>
+                <% } else { %>
+                    <a href="/auth/login">Login</a>
+                <% } %>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <%- body %>
+    </main>
+
+    <footer style="text-align: center; padding: 40px 0; color: #888; font-size: 0.9rem;">
+        <p>&copy; 2024 Driving School Management System. All Rights Reserved.</p>
+    </footer>
+</body>
+</html>

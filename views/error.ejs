@@ -1,0 +1,24 @@
+<div class="card" style="text-align: center; padding: 40px;">
+    <h1 style="color: var(--danger-color); font-size: 4rem; margin-bottom: 10px;">404</h1>
+    <h2 style="margin-bottom: 20px;">Page Not Found</h2>
+    <p style="color: #666; margin-bottom: 30px;">
+        <%= typeof message !== 'undefined' ? message : "The page you are looking for doesn't exist or has been moved." %>
+    </p>
+    
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+        <% if (locals.user) { %>
+            <!-- If logged in, send to their specific dashboard -->
+            <% if (user.role === 'SUPER_ADMIN') { %>
+                <a href="/superadmin/dashboard" class="btn">Back to Super Admin Dashboard</a>
+            <% } else if (locals.tenant) { %>
+                <a href="<%= tenantUrl('/dashboard') %>" class="btn">Back to <%= tenant.name %> Dashboard</a>
+            <% } else { %>
+                <a href="/" class="btn">Go to Homepage</a>
+            <% } %>
+        <% } else { %>
+            <!-- If not logged in, send to landing page -->
+            <a href="/" class="btn">Back to Homepage</a>
+            <a href="/auth/login" style="color: var(--accent-color); text-decoration: none; font-size: 0.9rem;">Or Login here</a>
+        <% } %>
+    </div>
+</div>

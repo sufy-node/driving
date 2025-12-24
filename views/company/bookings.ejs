@@ -1,0 +1,78 @@
+<div class="container">
+    <header class="mb-20" style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h1>Lesson Scheduling</h1>
+            <p>Manage and track driving lessons for <strong><%= tenant.name %></strong></p>
+        </div>
+        <a href="<%= tenantUrl('/dashboard') %>" class="btn">Back to Dashboard</a>
+    </header>
+
+    <% if (user.role === 'COMPANY_ADMIN' || user.role === 'TRAINER') { %>
+    <section class="card mb-20">
+        <h2>Schedule a New Lesson</h2>
+        <form action="<%= tenantUrl('/bookings/add') %>" method="POST">
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                <div>
+                    <label>Select Student</label>
+                    <select name="studentId" required style="width: 100%;">
+                        <% students.forEach(s => { %>
+                            <option value="<%= s._id %>"><%= s.name %></option>
+                        <% }) %>
+                    </select>
+                </div>
+                <div>
+                    <label>Select Trainer</label>
+                    <select name="trainerId" required style="width: 100%;">
+                        <% trainers.forEach(t => { %>
+                            <option value="<%= t._id %>"><%= t.name %></option>
+                        <% }) %>
+                    </select>
+                </div>
+                <div>
+                    <label>Date & Time</label>
+                    <input type="datetime-local" name="lessonDate" required style="width: 100%;">
+                </div>
+            </div>
+            <div class="mt-20">
+                <textarea name="notes" placeholder="Lesson objectives or pickup location..." style="width: 100%; height: 80px;"></textarea>
+            </div>
+            <button type="submit" class="btn-success mt-20">Confirm Booking</button>
+        </form>
+    </section>
+    <% } %>
+
+    <section class="card">
+        <h2>Upcoming & Past Lessons</h2>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date & Time</th>
+                        <th>Student</th>
+                        <th>Trainer</th>
+                        <th>Status</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (bookings.length === 0) { %>
+                        <tr><td colspan="5" class="text-center">No lessons found.</td></tr>
+                    <% } %>
+                    <% bookings.forEach(b => { %>
+                        <tr>
+                            <td><strong><%= new Date(b.lessonDate).toLocaleString() %></strong></td>
+                            <td><%= b.studentId ? b.studentId.name : 'Deleted User' %></td>
+                            <td><%= b.trainerId ? b.trainerId.name : 'Deleted User' %></td>
+                            <td>
+                                <span class="badge" style="background: #eee; color: #333;">
+                                    <%= b.status %>
+                                </span>
+                            </td>
+                            <td><small><%= b.notes || '-' %></small></td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>

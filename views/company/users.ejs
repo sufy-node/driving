@@ -1,0 +1,81 @@
+<div class="container">
+    <header class="mb-20" style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h1>User Management</h1>
+            <p>Manage trainers, students, and staff for <strong><%= tenant.name %></strong></p>
+        </div>
+        <a href="<%= tenantUrl('/dashboard') %>" class="btn">Back to Dashboard</a>
+    </header>
+
+    <div class="grid">
+        <!-- Add User Form -->
+        <section class="card">
+            <h2>Add New Member</h2>
+            <form action="<%= tenantUrl('/users/add') %>" method="POST">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <input type="text" name="name" placeholder="Full Name" required>
+                    <input type="email" name="email" placeholder="Email Address" required>
+                </div>
+                <input type="password" name="password" placeholder="Temporary Password" required>
+                
+                <label for="role">Assign Role</label>
+                <select name="role" id="role" required>
+                    <option value="TRAINER">Trainer (Instructor)</option>
+                    <option value="CUSTOMER">Student (Customer)</option>
+                    <option value="STAFF">Office Staff</option>
+                    <option value="DRIVER">Company Driver</option>
+                </select>
+
+                <button type="submit" class="btn-success">Register User</button>
+            </form>
+        </section>
+
+        <!-- Role Descriptions -->
+        <section class="card">
+            <h3>Role Permissions</h3>
+            <ul style="padding-left: 20px; font-size: 0.9rem;">
+                <li><strong>Trainers:</strong> Can view their own schedules and manage student progress.</li>
+                <li><strong>Students:</strong> Can book lessons and view their payment history.</li>
+                <li><strong>Staff:</strong> Can manage billing and customer support.</li>
+                <li><strong>Admins:</strong> Full control over this school's data.</li>
+            </ul>
+        </section>
+    </div>
+
+    <!-- User List Table -->
+    <section class="card">
+        <h2>Active Members</h2>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Joined</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% users.forEach(u => { %>
+                        <tr>
+                            <td><strong><%= u.name %></strong></td>
+                            <td><%= u.email %></td>
+                            <td>
+                                <span class="badge badge-<%= u.role.toLowerCase() %>">
+                                    <%= u.role %>
+                                </span>
+                            </td>
+                            <td>
+                                <span style="color: <%= u.isActive ? 'green' : 'red' %>">
+                                    ● <%= u.isActive ? 'Active' : 'Inactive' %>
+                                </span>
+                            </td>
+                            <td><%= new Date(u.createdAt).toLocaleDateString() %></td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>

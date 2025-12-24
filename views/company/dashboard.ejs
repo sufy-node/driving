@@ -1,0 +1,70 @@
+<div class="container">
+    <header class="mb-20" style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h1><%= tenant.name %></h1>
+            <p>Welcome back, <strong><%= user.name %></strong> 
+                <span class="badge badge-<%= user.role.toLowerCase() %>"><%= user.role %></span>
+            </p>
+        </div>
+        <div style="text-align: right;">
+            <a href="/auth/logout" class="btn btn-danger">Logout</a>
+        </div>
+    </header>
+
+    <!-- Statistics Row (Visible to Admins) -->
+    <% if (user.role === 'COMPANY_ADMIN') { %>
+    <section class="grid">
+        <div class="card" style="border-left: 5px solid var(--accent-color);">
+            <h3>Trainers</h3>
+            <p style="font-size: 1.5rem;"><%= stats.trainers %></p>
+        </div>
+        <div class="card" style="border-left: 5px solid var(--success-color);">
+            <h3>Students</h3>
+            <p style="font-size: 1.5rem;"><%= stats.students %></p>
+        </div>
+    </section>
+    <% } %>
+
+    <div class="grid">
+        <!-- Booking Module -->
+        <% if (tenant.enabledModules && tenant.enabledModules.bookings) { %>
+        <div class="card">
+            <h2>Lessons & Scheduling</h2>
+            <p>Manage driving lessons, view trainer availability, and track student progress.</p>
+            <div class="mt-20">
+                <a href="<%= tenantUrl('/bookings') %>" class="btn">Open Calendar</a>
+            </div>
+        </div>
+        <% } %>
+
+        <!-- Payments Module -->
+        <% if (tenant.enabledModules && tenant.enabledModules.payments) { %>
+        <div class="card">
+            <h2>Financials</h2>
+            <p>Track lesson payments, generate invoices, and view school revenue.</p>
+            <div class="mt-20">
+                <a href="<%= tenantUrl('/payments') %>" class="btn">View Payments</a>
+            </div>
+        </div>
+        <% } %>
+
+        <!-- User Management (Admin Only) -->
+        <% if (user.role === 'COMPANY_ADMIN') { %>
+        <div class="card">
+            <h2>Staff & Users</h2>
+            <p>Add new trainers, register students, and manage employee permissions.</p>
+            <div class="mt-20">
+                <a href="<%= tenantUrl('/users') %>" class="btn">Manage Users</a>
+            </div>
+        </div>
+        <% } %>
+    </div>
+
+    <!-- Quick Links for Trainers/Students -->
+    <% if (user.role === 'TRAINER' || user.role === 'CUSTOMER') { %>
+    <section class="card">
+        <h3>Your Upcoming Schedule</h3>
+        <p>No lessons scheduled for today.</p>
+    </section>
+    <% } %>
+</div>

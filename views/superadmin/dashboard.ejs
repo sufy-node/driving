@@ -1,0 +1,114 @@
+<div class="container">
+    <header class="mb-20">
+        <h1>Super Admin Control Panel</h1>
+        <% if (locals.success) { %>
+            <div style="background: #d4edda; color: #155724; padding: 10px; border-radius: 5px; margin-bottom: 15px;">
+                <%= success %>
+            </div>
+        <% } %>
+    </header>
+
+    <section class="grid">
+        <div class="card">
+            <h3>Total Schools</h3>
+            <p style="font-size: 2rem; font-weight: bold;"><%= companies.length %></p>
+        </div>
+        <div class="card">
+            <h3>Total Platform Users</h3>
+            <p style="font-size: 2rem; font-weight: bold;"><%= totalUsers %></p>
+        </div>
+    </section>
+
+    <div class="grid">
+        <section class="card">
+            <h2>Register New Driving School</h2>
+            <form action="/superadmin/companies/create" method="POST">
+                <input type="text" name="name" placeholder="School Name" required>
+                <input type="text" name="subdomain" placeholder="URL Slug (e.g. alpha)" required>
+                <hr>
+                <input type="email" name="adminEmail" placeholder="Admin Email" required>
+                <input type="password" name="adminPassword" placeholder="Admin Password" required>
+                <button type="submit" class="btn-success">Create School & Admin</button>
+            </form>
+        </section>
+
+        <section class="card">
+            <h2>Module Management</h2>
+            <p>Toggling these switches will instantly enable or disable features for the specific driving school.</p>
+            <div id="status-msg" style="margin-top: 10px; font-weight: bold; color: var(--success-color);"></div>
+        </section>
+    </div>
+
+    <section class="card">
+        <h2>Managed Driving Schools</h2>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>School Name</th>
+                        <th>Path</th>
+                        <th>Modules</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% companies.forEach(company => { %>
+                        <tr>
+                            <td><code>#<%= company._id %></code></td>
+                            <td><strong><%= company.name %></strong></td>
+                            <td><code>/c/<%= company.subdomain %></code></td>
+                            <td>
+                                <div style="display: flex; gap: 15px;">
+                                    <label style="cursor: pointer;">
+                                        <input type="checkbox" 
+                                        <%= (company.enabledModules && company.enabledModules.payments) ? 'checked' : '' %> 
+                                        onchange="updateModule('<%= company._id %>', 'payments', this.checked)">
+                                        Payments
+                                    </label>
+                                    <label style="cursor: pointer;">
+                                        <input type="checkbox" 
+                                        <%= (company.enabledModules && company.enabledModules.bookings) ? 'checked' : '' %> 
+                                        onchange="updateModule('<%= company._id %>', 'bookings', this.checked)">
+                                        Bookings
+                                    </label>
+                                </div>
+                            </td>
+                            <td>
+                                <a href="/superadmin/access/<%= company._id %>" class="btn" style="padding: 5px 10px; font-size: 0.8rem;">Login as Admin</a>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+
+<script>
+async function updateModule(companyId, moduleName, status) {
+    const msgDiv = document.getElementById('status-msg');
+    msgDiv.innerText = "Updating...";
+    
+    try {
+        const response = await fetch('/superadmin/companies/toggle-module', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ companyId, moduleName, status })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            msgDiv.innerText = "✓ " + result.message;
+            setTimeout(() => { msgDiv.innerText = ""; }, 3000);
+        } else {
+            alert('Error: ' + result.message);
+            msgDiv.innerText = "Failed to update.";
+        }
+    } catch (err) {
+        console.error(err);
+        alert('Connection error');
+    }
+}
+</script>
