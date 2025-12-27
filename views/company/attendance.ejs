@@ -1,66 +1,92 @@
 <div class="container">
-    <header class="mb-20" style="display: flex; justify-content: space-between; align-items: center;">
+    <header class="mb-20" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
         <div>
-            <h1>Daily Attendance</h1>
-            <p>Sessions for: <strong><%= selectedDate %></strong></p>
+            <h1 style="font-size: 1.8rem; letter-spacing: -1px;">Schedule Explorer</h1>
+            <p style="color: #666;">Viewing sessions for: <strong><%= new Date(selectedDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) %></strong></p>
         </div>
-        <input type="date" value="<%= selectedDate %>" onchange="window.location.href='?date='+this.value" style="padding: 8px;">
+        <div style="display: flex; align-items: center; gap: 10px; background: white; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;">
+            <label style="margin: 0; font-size: 0.85rem; font-weight: bold; color: var(--secondary-color);">Jump to Date:</label>
+            <input type="date" value="<%= selectedDate %>" onchange="window.location.href='?date='+this.value" style="margin: 0; padding: 5px; border: 1px solid #ddd; border-radius: 4px;">
+        </div>
     </header>
 
-    <section class="card">
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Time</th>
-                        <th>Student</th>
-                        <th>Vehicle</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% if (sessions.length === 0) { %>
-                        <tr><td colspan="5" class="text-center">No lessons scheduled for this date.</td></tr>
-                    <% } %>
-                    <% sessions.forEach(s => { %>
-                        <tr>
-                            <td><%= s.startTime %> - <%= s.endTime %></td>
-                            <td><strong><%= s.studentId?.name %></strong></td>
-                            <td><%= s.vehicleId?.name %></td>
-                            <td>
-                                <span class="badge" style="background: <%= s.status === 'PRESENT' ? 'var(--success-color)' : (s.status === 'ABSENT' ? 'var(--danger-color)' : '#eee') %>; color: <%= s.status === 'PENDING' ? '#333' : '#fff' %>">
-                                    <%= s.status %>
-                                </span>
-                            </td>
-                            <td>
-                                <% if (s.status === 'PENDING') { %>
-                                    <button onclick="markAttendance('<%= s._id %>', 'PRESENT')" class="btn-success" style="padding: 5px 10px;">P</button>
-                                    <button onclick="markAttendance('<%= s._id %>', 'ABSENT')" class="btn-danger" style="padding: 5px 10px;">A</button>
-                                <% } else { %>
-                                    <button onclick="resetAttendance('<%= s._id %>')" class="btn" style="padding: 5px 10px; background: #666;">Reset</button>
-                                <% } %>
-                            </td>
-                        </tr>
-                    <% }) %>
-                </tbody>
-            </table>
+    <!-- Unified Card-Based List -->
+    <section>
+        <% if (sessions.length === 0) { %>
+            <div class="card" style="text-align: center; padding: 60px;">
+                <div style="font-size: 3rem; margin-bottom: 15px;">📅</div>
+                <h3 style="color: #94a3b8;">No lessons scheduled for this date.</h3>
+                <p style="color: #cbd5e1;">Try selecting a different date from the picker above.</p>
+            </div>
+        <% } %>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px;">
+            <% sessions.forEach(s => { %>
+                <div class="card" style="border-top: 4px solid <%= s.status === 'PRESENT' ? 'var(--success-color)' : (s.status === 'ABSENT' ? 'var(--danger-color)' : 'var(--primary-color)') %>; position: relative; overflow: hidden;">
+                    
+                    <!-- Time Ribbon -->
+                    <div style="position: absolute; top: 15px; right: 15px; background: #f1f5f9; padding: 4px 10px; border-radius: 4px; font-weight: bold; color: var(--primary-color); font-size: 0.9rem;">
+                        <%= s.startTime %> - <%= s.endTime %>
+                    </div>
+
+                    <div style="margin-bottom: 15px;">
+                        <small style="color: #94a3b8; font-weight: bold; text-transform: uppercase; font-size: 0.7rem;">Student Name</small>
+                        <h3 style="margin: 2px 0; color: var(--text-dark);"><%= s.studentId?.name %></h3>
+                        <% if (s.studentId?.phone) { %>
+                            <a href="tel:<%= s.studentId.phone %>" style="font-size: 0.85rem; color: var(--accent-color); font-weight: 600;">📞 <%= s.studentId.phone %></a>
+                        <% } %>
+                    </div>
+
+                    <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
+                        <div style="background: #f8fafc; padding: 8px; border-radius: 6px;">
+                            <small style="color: #94a3b8; font-size: 0.65rem; font-weight: bold; display: block; text-transform: uppercase;">Instructor</small>
+                            <span style="font-size: 0.85rem; font-weight: 600;"><%= s.trainerId?.name %></span>
+                        </div>
+                        <div style="background: #f8fafc; padding: 8px; border-radius: 6px;">
+                            <small style="color: #94a3b8; font-size: 0.65rem; font-weight: bold; display: block; text-transform: uppercase;">Vehicle</small>
+                            <span style="font-size: 0.85rem; font-weight: 600;"><%= s.vehicleId?.name %></span>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 15px; border-top: 1px solid #f1f5f9;">
+                        <span class="badge" style="background: <%= s.status === 'PRESENT' ? 'var(--success-color)' : (s.status === 'ABSENT' ? 'var(--danger-color)' : '#e2e8f0') %>; color: <%= s.status === 'PENDING' ? '#475569' : '#fff' %>">
+                            <%= s.status %>
+                        </span>
+
+                        <div style="display: flex; gap: 8px;">
+                            <% if (s.status === 'PENDING') { %>
+                                <button onclick="markAttendance('<%= s._id %>', 'PRESENT')" class="btn-success" style="padding: 6px 15px; font-size: 0.8rem;">Present</button>
+                                <button onclick="markAttendance('<%= s._id %>', 'ABSENT')" class="btn-danger" style="padding: 6px 15px; font-size: 0.8rem;">Absent</button>
+                            <% } else { %>
+                                <button onclick="resetAttendance('<%= s._id %>')" class="btn" style="background: #94a3b8; padding: 6px 15px; font-size: 0.8rem;">Reset</button>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            <% }) %>
         </div>
     </section>
 </div>
 
 <script>
 async function markAttendance(sessionId, status) {
-    const res = await fetch('<%= tenantUrl("/attendance/mark") %>', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId, status })
+    const { value: notes } = await Swal.fire({
+        title: 'Lesson Feedback',
+        input: 'textarea',
+        inputLabel: 'Notes for the student progress card',
+        inputPlaceholder: 'e.g. Practiced gear shifts...',
+        showCancelButton: true,
+        confirmButtonText: 'Submit',
+        confirmButtonColor: 'var(--success-color)'
     });
-    const result = await res.json();
-    if (result.success) {
-        window.location.reload();
-    } else {
-        Swal.fire('Error', result.message, 'error');
+
+    if (notes !== undefined) {
+        const res = await fetch('<%= tenantUrl("/attendance/mark") %>', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sessionId, status, notes })
+        });
+        if ((await res.json()).success) location.reload();
     }
 }
 
@@ -70,23 +96,15 @@ async function resetAttendance(sessionId) {
         text: "This will revert progress and remove any plan extensions.",
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, reset it!'
+        confirmButtonText: 'Yes, reset it'
     });
-
     if (isConfirmed) {
         const res = await fetch('<%= tenantUrl("/attendance/reset") %>', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ sessionId })
         });
-        const result = await res.json();
-        if (result.success) {
-            window.location.reload();
-        } else {
-            Swal.fire('Error', result.message, 'error');
-        }
+        if ((await res.json()).success) location.reload();
     }
 }
 </script>

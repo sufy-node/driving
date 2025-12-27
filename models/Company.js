@@ -6,6 +6,8 @@ const companySchema = new mongoose.Schema({
     subdomain: { type: String, required: true, unique: true, lowercase: true },
     logo: { type: String, default: 'default-logo.png' },
     primaryColor: { type: String, default: '#3498db' },
+    secondaryColor: { type: String, default: '#64748b' },
+    accentColor: { type: String, default: '#6366f1' },
     isActive: { type: Boolean, default: true },
     enabledModules: {
         payments: { type: Boolean, default: false },

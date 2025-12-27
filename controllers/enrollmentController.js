@@ -30,13 +30,15 @@ export const getEnrollmentPage = catchAsync(async (req, res, next) => {
 });
 
 export const createEnrollment = catchAsync(async (req, res, next) => {
-    const { studentId, trainerId, vehicleId, planDays, startDate, startTime, endTime, skipSundays } = req.body;
+    const { studentId, trainerId, vehicleId, planDays, startDate, startTime, endTime, skipSundays, totalPrice } = req.body;
     const companyId = req.tenant._id;
 
-    // 1. Generate dates
+    if (!studentId || !trainerId || !vehicleId || !planDays || !totalPrice) {
+        return res.redirect(res.locals.tenantUrl('/enrollments?error=Missing required fields including Plan Price'));
+    }
+
     const sessionDates = [];
     let currentDate = new Date(startDate);
-    currentDate.setHours(0,0,0,0); // Normalize to midnight
     const daysToGenerate = parseInt(planDays);
 
     while (sessionDates.length < daysToGenerate) {
@@ -46,35 +48,23 @@ export const createEnrollment = catchAsync(async (req, res, next) => {
         currentDate.setDate(currentDate.getDate() + 1);
     }
 
-    // 2. STRICT CONFLICT CHECK
     const conflict = await Session.findOne({
         companyId,
         date: { $in: sessionDates },
         status: { $ne: 'CANCELLED' },
-        $or: [
-            { trainerId: trainerId },
-            { vehicleId: Number(vehicleId) },
-            { studentId: studentId }
-        ],
-        $and: [
-            { startTime: { $lt: endTime } },
-            { endTime: { $gt: startTime } }
-        ]
-    }).populate('trainerId studentId vehicleId');
+        $or: [{ trainerId }, { vehicleId: Number(vehicleId) }, { studentId }],
+        $and: [{ startTime: { $lt: endTime } }, { endTime: { $gt: startTime } }]
+    });
 
     if (conflict) {
-        const entity = conflict.trainerId._id.toString() === trainerId ? `Trainer ${conflict.trainerId.name}` : 
-                       conflict.vehicleId._id === Number(vehicleId) ? `Vehicle ${conflict.vehicleId.name}` : 
-                       `Student ${conflict.studentId.name}`;
-        
-        return res.redirect(res.locals.tenantUrl(`/enrollments?error=CONFLICT: ${entity} is already busy on ${conflict.date.toDateString()} at ${conflict.startTime}`));
+        return res.redirect(res.locals.tenantUrl(`/enrollments?error=Schedule conflict detected.`));
     }
 
-    // 3. Create
     const enrollment = await insertRecord(Enrollment, {
         companyId, studentId, trainerId, vehicleId: Number(vehicleId),
-        planDays: daysToGenerate, startDate: sessionDates[0],
-        startTime, endTime, skipSundays: skipSundays === 'on'
+        planDays: daysToGenerate, startDate: new Date(startDate),
+        startTime, endTime, skipSundays: skipSundays === 'on',
+        totalPrice: Number(totalPrice) // Store the total cost
     });
 
     const sessionRecords = sessionDates.map(date => ({
@@ -83,16 +73,32 @@ export const createEnrollment = catchAsync(async (req, res, next) => {
     }));
 
     await Session.insertMany(sessionRecords);
-    res.redirect(res.locals.tenantUrl('/enrollments?success=Plan generated successfully!'));
+    res.redirect(res.locals.tenantUrl('/enrollments?success=Plan generated with price: ' + totalPrice));
 });
 
 export const getStudentProgress = catchAsync(async (req, res, next) => {
     const { id } = req.params;
-    const [enrollment, sessions] = await Promise.all([
-        Enrollment.findOne({ _id: id, companyId: req.tenant._id }).populate('studentId trainerId vehicleId').lean(),
-        Session.find({ enrollmentId: id }).sort({ date: 1 }).lean()
+    const companyId = req.tenant._id;
+
+    // Parallel fetching of Enrollment, Sessions, and now PAYMENTS
+    const [enrollment, sessions, payments] = await Promise.all([
+        Enrollment.findOne({ _id: id, companyId }).populate('studentId trainerId vehicleId').lean(),
+        Session.find({ enrollmentId: id, companyId }).sort({ date: 1 }).lean(),
+        Payment.find({ enrollmentId: id, companyId }).populate('recordedBy', 'name').sort({ createdAt: -1 }).lean()
     ]);
+
     if (!enrollment) return next(new AppError('Enrollment not found', 404));
-    res.render('company/studentProgress', { title: 'Progress Card', enrollment, sessions, tenant: req.tenant, user: req.user });
+
+    // Calculate total paid for this specific plan
+    const totalPaid = payments.reduce((sum, p) => sum + p.amount, 0);
+
+    res.render('company/studentProgress', {
+        title: `Progress: ${enrollment.studentId.name}`,
+        enrollment: { ...enrollment, totalPaid, balance: enrollment.totalPrice - totalPaid },
+        sessions,
+        payments, // Pass the individual payment history
+        tenant: req.tenant,
+        user: req.user
+    });
 });
 

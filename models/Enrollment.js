@@ -13,7 +13,9 @@ const enrollmentSchema = new mongoose.Schema({
     endTime: { type: String, required: true },   // e.g., "09:30"
     startDate: { type: Date, required: true },
     status: { type: String, enum: ['ACTIVE', 'COMPLETED', 'CANCELLED'], default: 'ACTIVE' },
-    skipSundays: { type: Boolean, default: true }
+    skipSundays: { type: Boolean, default: true },
+    totalPrice: { type: Number, default: 0 },
+
 }, { timestamps: true, _id: false });
 
 const Enrollment = mongoose.model('Enrollment', enrollmentSchema);

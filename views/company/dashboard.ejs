@@ -1,94 +1,83 @@
 <div class="container">
     <header class="mb-20" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
         <div>
-            <h1 style="font-size: 2rem;">Welcome, <%= user.name %></h1>
-            <p style="color: #666;">Managing <strong><%= tenant.name %></strong> Command Center</p>
+            <h1 style="font-size: 2rem; letter-spacing: -1px;">Welcome, <%= user.name %></h1>
+            <p style="color: var(--secondary-color);">School: <strong><%= tenant.name %></strong></p>
         </div>
-        <div style="display: flex; gap: 10px;">
-            <a href="<%= tenantUrl('/attendance') %>" class="btn" style="background: var(--primary-color);">View Full Schedule</a>
-        </div>
+        <a href="<%= tenantUrl('/attendance') %>" class="btn btn-primary">Today's Schedule</a>
     </header>
 
     <!-- KPI Stats Grid -->
     <section class="grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
-        <div class="card" style="border-left: 5px solid var(--accent-color);">
-            <small style="text-transform: uppercase; font-weight: bold; color: #888;">Active Enrollments</small>
-            <h2 style="font-size: 2.2rem; margin-top: 5px;"><%= stats.activeEnrollments %></h2>
+        <div class="card" style="border-bottom: 4px solid var(--primary-color);">
+            <small style="text-transform: uppercase; font-weight: bold; color: var(--secondary-color); font-size: 0.7rem;">Active Plans</small>
+            <h2 style="font-size: 2rem; margin-top: 5px;"><%= stats.activeEnrollments %></h2>
         </div>
-        <div class="card" style="border-left: 5px solid var(--success-color);">
-            <small style="text-transform: uppercase; font-weight: bold; color: #888;">Today's Lessons</small>
-            <h2 style="font-size: 2.2rem; margin-top: 5px;"><%= stats.todaysSessions %></h2>
+        <div class="card" style="border-bottom: 4px solid var(--success-color);">
+            <small style="text-transform: uppercase; font-weight: bold; color: var(--secondary-color); font-size: 0.7rem;">Today's Lessons</small>
+            <h2 style="font-size: 2rem; margin-top: 5px;"><%= stats.todaysSessions %></h2>
         </div>
-        <div class="card" style="border-left: 5px solid #f1c40f;">
-            <small style="text-transform: uppercase; font-weight: bold; color: #888;">Active Vehicles</small>
-            <h2 style="font-size: 2.2rem; margin-top: 5px;"><%= stats.activeVehicles %></h2>
+        <div class="card" style="border-bottom: 4px solid var(--warning-color);">
+            <small style="text-transform: uppercase; font-weight: bold; color: var(--secondary-color); font-size: 0.7rem;">Active Vehicles</small>
+            <h2 style="font-size: 2rem; margin-top: 5px;"><%= stats.activeVehicles %></h2>
         </div>
-        <div class="card" style="border-left: 5px solid #9b59b6;">
-            <small style="text-transform: uppercase; font-weight: bold; color: #888;">Total Students</small>
-            <h2 style="font-size: 2.2rem; margin-top: 5px;"><%= stats.totalStudents %></h2>
+        <div class="card" style="border-bottom: 4px solid var(--accent-color);">
+            <small style="text-transform: uppercase; font-weight: bold; color: var(--secondary-color); font-size: 0.7rem;">Total Students</small>
+            <h2 style="font-size: 2rem; margin-top: 5px;"><%= stats.totalStudents %></h2>
         </div>
     </section>
 
-    <div class="grid" style="grid-template-columns: 2fr 1fr; margin-top: 20px;">
+    <div class="grid" style="grid-template-columns: 2fr 1fr;">
         
-        <!-- Left Column: Upcoming Schedule -->
-        <section>
-            <div class="card">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h2>Upcoming Schedule</h2>
-                    <a href="<%= tenantUrl('/attendance') %>" style="font-size: 0.9rem; color: var(--accent-color);">View All</a>
-                </div>
-                <div class="table-container">
-                    <table>
-                        <thead>
+        <!-- Upcoming Schedule -->
+        <section class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="font-size: 1.2rem;">Upcoming Schedule</h2>
+                <a href="<%= tenantUrl('/attendance') %>" style="font-size: 0.8rem; color: var(--primary-color); font-weight: 600;">View All</a>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Student</th>
+                            <th>Trainer</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (upcomingSessions.length === 0) { %>
+                            <tr><td colspan="4" class="text-center" style="padding: 30px; color: var(--secondary-color);">No upcoming lessons.</td></tr>
+                        <% } %>
+                        <% upcomingSessions.forEach(session => { %>
                             <tr>
-                                <th>Date</th>
-                                <th>Time</th>
-                                <th>Student</th>
-                                <th>Trainer</th>
-                                <th>Status</th>
+                                <td><small><%= new Date(session.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) %></small></td>
+                                <td><strong><%= session.startTime %></strong></td>
+                                <td><%= session.studentId?.name %></td>
+                                <td><small><%= session.trainerId?.name %></small></td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            <% if (upcomingSessions.length === 0) { %>
-                                <tr><td colspan="5" class="text-center">No upcoming lessons found.</td></tr>
-                            <% } %>
-                            <% upcomingSessions.forEach(session => { %>
-                                <tr>
-                                    <td><small><%= new Date(session.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) %></small></td>
-                                    <td><strong><%= session.startTime %></strong></td>
-                                    <td><%= session.studentId?.name %></td>
-                                    <td><%= session.trainerId?.name %></td>
-                                    <td><span class="badge" style="background: #eee; color: #333;"><%= session.status %></span></td>
-                                </tr>
-                            <% }) %>
-                        </tbody>
-                    </table>
-                </div>
+                        <% }) %>
+                    </tbody>
+                </table>
             </div>
         </section>
 
-        <!-- Right Column: Quick Actions & Alerts -->
+        <!-- Alerts & Actions -->
         <section style="display: flex; flex-direction: column; gap: 20px;">
-            
             <% if (stats.pendingAttendanceCount > 0) { %>
-                <div class="card" style="background: #fff5f5; border: 1px solid #feb2b2;">
-                    <h3 style="color: #c53030;">⚠️ Attendance Alert</h3>
-                    <p style="margin-top: 10px; font-size: 0.95rem;">
-                        <strong><%= stats.pendingAttendanceCount %></strong> sessions from previous days are still unmarked.
-                    </p>
-                    <a href="<%= tenantUrl('/attendance') %>" class="btn-danger" style="display: block; text-align: center; margin-top: 15px; text-decoration: none; padding: 10px; border-radius: 5px;">
-                        Resolve Now
-                    </a>
+                <div class="card" style="background: #fff1f2; border: 1px solid #fecdd3;">
+                    <h3 style="color: var(--danger-color); font-size: 1rem;">⚠️ Action Required</h3>
+                    <p style="font-size: 0.85rem; margin: 10px 0;"><strong><%= stats.pendingAttendanceCount %></strong> sessions are unmarked.</p>
+                    <a href="<%= tenantUrl('/attendance') %>" class="btn btn-danger" style="width: 100%; font-size: 0.8rem;">Fix Now</a>
                 </div>
             <% } %>
 
             <div class="card">
-                <h3>Quick Actions</h3>
-                <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
-                    <a href="<%= tenantUrl('/enrollments') %>" class="btn" style="background: #f8f9fa; color: #333; border: 1px solid #ddd; text-align: left;">➕ New Enrollment</a>
-                    <a href="<%= tenantUrl('/vehicles') %>" class="btn" style="background: #f8f9fa; color: #333; border: 1px solid #ddd; text-align: left;">🚗 Add Vehicle</a>
-                    <a href="<%= tenantUrl('/users') %>" class="btn" style="background: #f8f9fa; color: #333; border: 1px solid #ddd; text-align: left;">👤 Manage Staff</a>
+                <h3 style="font-size: 1rem; margin-bottom: 15px;">Quick Actions</h3>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <a href="<%= tenantUrl('/enrollments') %>" class="btn btn-outline" style="justify-content: flex-start;">➕ New Enrollment</a>
+                    <a href="<%= tenantUrl('/vehicles') %>" class="btn btn-outline" style="justify-content: flex-start;">🚗 Add Vehicle</a>
+                    <a href="<%= tenantUrl('/users') %>" class="btn btn-outline" style="justify-content: flex-start;">👤 Manage Staff</a>
                 </div>
             </div>
         </section>

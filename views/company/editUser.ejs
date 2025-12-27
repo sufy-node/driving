@@ -4,45 +4,43 @@
         <p>Updating information for <strong><%= targetUser.name %></strong></p>
     </header>
 
-    <section class="card" style="max-width: 700px; margin: 0 auto;">
+    <section class="card" style="max-width: 700px; margin: 0 auto; border-top: 4px solid var(--accent-color);">
         <form action="<%= tenantUrl('/users/edit/' + targetUser._id) %>" method="POST">
             <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 20px;">
                 <div>
-                    <label>Full Name</label>
-                    <input type="text" name="name" value="<%= targetUser.name %>" required style="width: 100%;">
+                    <label style="font-weight: 600;">Full Name</label>
+                    <input type="text" name="name" value="<%= targetUser.name %>" required>
                 </div>
                 <div>
-                    <label>Email Address</label>
-                    <input type="email" name="email" value="<%= targetUser.email %>" required style="width: 100%;">
+                    <label style="font-weight: 600;">Email Address</label>
+                    <input type="email" name="email" value="<%= targetUser.email %>" required>
+                </div>
+                <div>
+                    <label style="font-weight: 600;">Phone Number</label>
+                    <input type="text" name="phone" value="<%= targetUser.phone || '' %>" required>
+                </div>
+                <div>
+                    <label style="font-weight: 600;">User Role</label>
+                    <select name="role" required>
+                        <option value="TRAINER" <%= targetUser.role === 'TRAINER' ? 'selected' : '' %>>Trainer (Instructor)</option>
+                        <option value="CUSTOMER" <%= targetUser.role === 'CUSTOMER' ? 'selected' : '' %>>Student (Customer)</option>
+                        <option value="STAFF" <%= targetUser.role === 'STAFF' ? 'selected' : '' %>>Office Staff</option>
+                        <option value="COMPANY_ADMIN" <%= targetUser.role === 'COMPANY_ADMIN' ? 'selected' : '' %>>Company Admin</option>
+                    </select>
                 </div>
             </div>
 
-            <div style="margin-top: 20px;">
-                <label>User Role</label>
-                <select name="role" required style="width: 100%;">
-                    <option value="TRAINER" <%= targetUser.role === 'TRAINER' ? 'selected' : '' %>>Trainer (Instructor)</option>
-                    <option value="CUSTOMER" <%= targetUser.role === 'CUSTOMER' ? 'selected' : '' %>>Student (Customer)</option>
-                    <option value="STAFF" <%= targetUser.role === 'STAFF' ? 'selected' : '' %>>Office Staff</option>
-                    <option value="COMPANY_ADMIN" <%= targetUser.role === 'COMPANY_ADMIN' ? 'selected' : '' %>>Company Admin</option>
-                </select>
-            </div>
-
-            <div style="margin-top: 20px;">
-                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
-                    <input type="checkbox" name="isActive" <%= targetUser.isActive ? 'checked' : '' %>>
-                    <span>Account is Active (User can log in)</span>
+            <div style="margin-top: 20px; padding: 15px; background: #f8fafc; border-radius: 8px;">
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; margin: 0;">
+                    <input type="checkbox" name="isActive" <%= targetUser.isActive ? 'checked' : '' %> style="width: 20px; height: 20px;">
+                    <span style="font-weight: 600;">Account is Active (User can log in)</span>
                 </label>
             </div>
 
-            <div style="display: flex; gap: 10px; margin-top: 30px;">
-                <button type="submit" class="btn-success" style="flex: 2;">Save Changes</button>
-                <a href="<%= tenantUrl('/users') %>" class="btn" style="flex: 1; background: #666;">Cancel</a>
+            <div style="display: flex; gap: 10px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+                <button type="submit" class="btn-success" style="flex: 2; padding: 12px;">Save Changes</button>
+                <a href="<%= tenantUrl('/users') %>" class="btn" style="flex: 1; background: #64748b; text-align: center; padding: 12px;">Cancel</a>
             </div>
         </form>
-    </section>
-
-    <section class="card mt-20" style="max-width: 700px; margin: 20px auto; border-left: 5px solid var(--warning-color);">
-        <h3>Security Note</h3>
-        <p>Changing a user's role may affect their access to specific modules. If you change a user to "Admin", they will have full control over this school's data.</p>
     </section>
 </div>

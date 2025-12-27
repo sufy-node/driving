@@ -1,20 +1,19 @@
 <div class="container">
     <header class="mb-20" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
         <div>
-            <h1 style="font-size: 2rem; letter-spacing: -1px;">Student Enrollments</h1>
-            <p style="color: #666;">Manage training plans and schedules for <strong><%= tenant.name %></strong></p>
+            <h1>Student Enrollments</h1>
+            <p style="color: #666;">Manage training plans for <strong><%= tenant.name %></strong></p>
         </div>
         <a href="<%= tenantUrl('/dashboard') %>" class="btn">Back to Dashboard</a>
     </header>
 
-    <!-- Section 1: New Enrollment Form -->
     <section class="card mb-30" style="border-top: 4px solid var(--primary-color);">
         <h2 style="margin-bottom: 20px;">Assign New Training Plan</h2>
         <form action="<%= tenantUrl('/enrollments/add') %>" method="POST">
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px;">
                 <div>
-                    <label style="font-weight: 600; display: block; margin-bottom: 8px;">Select Student</label>
-                    <select name="studentId" required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px;">
+                    <label>Select Student</label>
+                    <select name="studentId" required>
                         <option value="">-- Choose Student --</option>
                         <% students.forEach(s => { %>
                             <option value="<%= s._id %>"><%= s.name %></option>
@@ -22,8 +21,8 @@
                     </select>
                 </div>
                 <div>
-                    <label style="font-weight: 600; display: block; margin-bottom: 8px;">Assign Trainer</label>
-                    <select name="trainerId" required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px;">
+                    <label>Assign Trainer</label>
+                    <select name="trainerId" required>
                         <option value="">-- Choose Trainer --</option>
                         <% trainers.forEach(t => { %>
                             <option value="<%= t._id %>"><%= t.name %></option>
@@ -31,8 +30,8 @@
                     </select>
                 </div>
                 <div>
-                    <label style="font-weight: 600; display: block; margin-bottom: 8px;">Assign Vehicle</label>
-                    <select name="vehicleId" required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px;">
+                    <label>Assign Vehicle</label>
+                    <select name="vehicleId" required>
                         <option value="">-- Choose Vehicle --</option>
                         <% vehicles.forEach(v => { %>
                             <option value="<%= v._id %>"><%= v.name %> (<%= v.plateNumber %>)</option>
@@ -40,108 +39,73 @@
                     </select>
                 </div>
                 <div>
-                    <label style="font-weight: 600; display: block; margin-bottom: 8px;">Plan Duration (Days)</label>
-                    <input type="number" name="planDays" value="15" min="1" max="60" required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px;">
+                    <label>Total Plan Price (Fees)</label>
+                    <input type="number" name="totalPrice" placeholder="e.g. 5000" required>
                 </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 20px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-top: 20px;">
                 <div>
-                    <label style="font-weight: 600; display: block; margin-bottom: 8px;">Start Date</label>
-                    <input type="date" name="startDate" required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px;">
+                    <label>Plan Duration (Days)</label>
+                    <input type="number" name="planDays" value="15" min="1" required>
                 </div>
                 <div>
-                    <label style="font-weight: 600; display: block; margin-bottom: 8px;">Daily Start Time</label>
-                    <input type="time" name="startTime" required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px;">
+                    <label>Start Date</label>
+                    <input type="date" name="startDate" required>
                 </div>
                 <div>
-                    <label style="font-weight: 600; display: block; margin-bottom: 8px;">Daily End Time</label>
-                    <input type="time" name="endTime" required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px;">
+                    <label>Start Time</label>
+                    <input type="time" name="startTime" required>
                 </div>
-                <div style="display: flex; align-items: center; padding-top: 25px;">
-                    <label style="cursor: pointer; display: flex; align-items: center; gap: 10px; font-weight: 600;">
-                        <input type="checkbox" name="skipSundays" checked style="width: 20px; height: 20px;"> 
-                        Skip Sundays
-                    </label>
+                <div>
+                    <label>End Time</label>
+                    <input type="time" name="endTime" required>
                 </div>
             </div>
 
-            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
-                <button type="submit" class="btn-success" style="padding: 12px 40px; font-weight: bold; font-size: 1rem;">
-                    Generate 15-Day Training Schedule
-                </button>
-                <p style="margin-top: 10px; font-size: 0.85rem; color: #666;">
-                    * The system will automatically check for trainer and vehicle conflicts before generating.
-                </p>
+            <div style="margin-top: 20px; display: flex; align-items: center; gap: 10px;">
+                <input type="checkbox" name="skipSundays" id="skipSun" checked style="width: auto; margin: 0;">
+                <label for="skipSun" style="margin: 0;">Skip Sundays</label>
             </div>
+
+            <button type="submit" class="btn-success mt-20" style="padding: 12px 40px;">Generate Training Schedule</button>
         </form>
     </section>
 
-    <!-- Section 2: Active Enrollments List -->
     <section class="card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h2>Active Training Plans</h2>
-            <span style="background: #f1f5f9; padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; color: #475569;">
-                Total: <%= pagination.total %> Enrollments
-            </span>
-        </div>
-
+        <h2>Active Training Plans</h2>
         <div class="table-container">
             <table>
                 <thead>
                     <tr>
-                        <th>Student Name</th>
+                        <th>Student</th>
                         <th>Trainer</th>
-                        <th>Vehicle</th>
-                        <th>Plan Type</th>
-                        <th>Progress Status</th>
+                        <th>Plan Price</th>
+                        <th>Progress</th>
                         <th style="text-align: right;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <% if (enrollments.length === 0) { %>
-                        <tr>
-                            <td colspan="6" class="text-center" style="padding: 40px; color: #999;">
-                                No active enrollments found. Start by adding a new plan above.
-                            </td>
-                        </tr>
-                    <% } %>
                     <% enrollments.forEach(e => { %>
                         <tr>
-                            <td>
-                                <div style="font-weight: 700;"><%= e.studentId?.name %></div>
-                                <div style="font-size: 0.75rem; color: #888;">ID: <%= e._id.substring(0,8) %>...</div>
-                            </td>
+                            <td><strong><%= e.studentId?.name %></strong></td>
                             <td><%= e.trainerId?.name %></td>
-                            <td>
-                                <div style="font-size: 0.9rem;"><%= e.vehicleId?.name %></div>
-                                <code style="font-size: 0.75rem;"><%= e.vehicleId?.plateNumber %></code>
-                            </td>
-                            <td>
-                                <span style="font-weight: 600;"><%= e.planDays %> Days</span>
-                            </td>
+                            <td><strong>$<%= e.totalPrice?.toLocaleString() %></strong></td>
                             <td>
                                 <% let progress = Math.round((e.completedDays / e.planDays) * 100); %>
-                                <div style="display: flex; align-items: center; gap: 10px;">
-                                    <div style="background: #eee; border-radius: 10px; height: 8px; width: 100px; overflow: hidden;">
-                                        <div style="background: var(--primary-color); height: 100%; width: <%= progress %>%;"></div>
-                                    </div>
-                                    <small style="font-weight: bold;"><%= progress %>%</small>
+                                <div style="background: #eee; border-radius: 10px; height: 8px; width: 100px; overflow: hidden;">
+                                    <div style="background: var(--primary-color); height: 100%; width: <%= progress %>%;"></div>
                                 </div>
-                                <small style="color: #666;"><%= e.completedDays %> / <%= e.planDays %> Days Present</small>
+                                <small><%= e.completedDays %> / <%= e.planDays %> Days</small>
                             </td>
                             <td style="text-align: right;">
-                                <a href="<%= tenantUrl('/enrollments/progress/' + e._id) %>" class="btn" style="padding: 6px 15px; font-size: 0.8rem; background: var(--accent-color); font-weight: 600;">
-                                    View Digital Card
-                                </a>
+                                <a href="<%= tenantUrl('/enrollments/progress/' + e._id) %>" class="btn" style="padding: 6px 15px; font-size: 0.8rem; background: var(--accent-color);">View Card</a>
                             </td>
                         </tr>
                     <% }) %>
                 </tbody>
             </table>
         </div>
-
-        <!-- Modern Pagination Partial -->
         <%- include('../partials/pagination') %>
     </section>
 </div>
