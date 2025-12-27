@@ -1,70 +1,96 @@
 <div class="container">
-    <header class="mb-20" style="display: flex; justify-content: space-between; align-items: center;">
+    <header class="mb-20" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
         <div>
-            <h1><%= tenant.name %></h1>
-            <p>Welcome back, <strong><%= user.name %></strong> 
-                <span class="badge badge-<%= user.role.toLowerCase() %>"><%= user.role %></span>
-            </p>
+            <h1 style="font-size: 2rem;">Welcome, <%= user.name %></h1>
+            <p style="color: #666;">Managing <strong><%= tenant.name %></strong> Command Center</p>
         </div>
-        <div style="text-align: right;">
-            <a href="/auth/logout" class="btn btn-danger">Logout</a>
+        <div style="display: flex; gap: 10px;">
+            <a href="<%= tenantUrl('/attendance') %>" class="btn" style="background: var(--primary-color);">View Full Schedule</a>
         </div>
     </header>
 
-    <!-- Statistics Row (Visible to Admins) -->
-    <% if (user.role === 'COMPANY_ADMIN') { %>
-    <section class="grid">
+    <!-- KPI Stats Grid -->
+    <section class="grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
         <div class="card" style="border-left: 5px solid var(--accent-color);">
-            <h3>Trainers</h3>
-            <p style="font-size: 1.5rem;"><%= stats.trainers %></p>
+            <small style="text-transform: uppercase; font-weight: bold; color: #888;">Active Enrollments</small>
+            <h2 style="font-size: 2.2rem; margin-top: 5px;"><%= stats.activeEnrollments %></h2>
         </div>
         <div class="card" style="border-left: 5px solid var(--success-color);">
-            <h3>Students</h3>
-            <p style="font-size: 1.5rem;"><%= stats.students %></p>
+            <small style="text-transform: uppercase; font-weight: bold; color: #888;">Today's Lessons</small>
+            <h2 style="font-size: 2.2rem; margin-top: 5px;"><%= stats.todaysSessions %></h2>
+        </div>
+        <div class="card" style="border-left: 5px solid #f1c40f;">
+            <small style="text-transform: uppercase; font-weight: bold; color: #888;">Active Vehicles</small>
+            <h2 style="font-size: 2.2rem; margin-top: 5px;"><%= stats.activeVehicles %></h2>
+        </div>
+        <div class="card" style="border-left: 5px solid #9b59b6;">
+            <small style="text-transform: uppercase; font-weight: bold; color: #888;">Total Students</small>
+            <h2 style="font-size: 2.2rem; margin-top: 5px;"><%= stats.totalStudents %></h2>
         </div>
     </section>
-    <% } %>
 
-    <div class="grid">
-        <!-- Booking Module -->
-        <% if (tenant.enabledModules && tenant.enabledModules.bookings) { %>
-        <div class="card">
-            <h2>Lessons & Scheduling</h2>
-            <p>Manage driving lessons, view trainer availability, and track student progress.</p>
-            <div class="mt-20">
-                <a href="<%= tenantUrl('/bookings') %>" class="btn">Open Calendar</a>
+    <div class="grid" style="grid-template-columns: 2fr 1fr; margin-top: 20px;">
+        
+        <!-- Left Column: Upcoming Schedule -->
+        <section>
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2>Upcoming Schedule</h2>
+                    <a href="<%= tenantUrl('/attendance') %>" style="font-size: 0.9rem; color: var(--accent-color);">View All</a>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Student</th>
+                                <th>Trainer</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (upcomingSessions.length === 0) { %>
+                                <tr><td colspan="5" class="text-center">No upcoming lessons found.</td></tr>
+                            <% } %>
+                            <% upcomingSessions.forEach(session => { %>
+                                <tr>
+                                    <td><small><%= new Date(session.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) %></small></td>
+                                    <td><strong><%= session.startTime %></strong></td>
+                                    <td><%= session.studentId?.name %></td>
+                                    <td><%= session.trainerId?.name %></td>
+                                    <td><span class="badge" style="background: #eee; color: #333;"><%= session.status %></span></td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        </div>
-        <% } %>
+        </section>
 
-        <!-- Payments Module -->
-        <% if (tenant.enabledModules && tenant.enabledModules.payments) { %>
-        <div class="card">
-            <h2>Financials</h2>
-            <p>Track lesson payments, generate invoices, and view school revenue.</p>
-            <div class="mt-20">
-                <a href="<%= tenantUrl('/payments') %>" class="btn">View Payments</a>
-            </div>
-        </div>
-        <% } %>
+        <!-- Right Column: Quick Actions & Alerts -->
+        <section style="display: flex; flex-direction: column; gap: 20px;">
+            
+            <% if (stats.pendingAttendanceCount > 0) { %>
+                <div class="card" style="background: #fff5f5; border: 1px solid #feb2b2;">
+                    <h3 style="color: #c53030;">⚠️ Attendance Alert</h3>
+                    <p style="margin-top: 10px; font-size: 0.95rem;">
+                        <strong><%= stats.pendingAttendanceCount %></strong> sessions from previous days are still unmarked.
+                    </p>
+                    <a href="<%= tenantUrl('/attendance') %>" class="btn-danger" style="display: block; text-align: center; margin-top: 15px; text-decoration: none; padding: 10px; border-radius: 5px;">
+                        Resolve Now
+                    </a>
+                </div>
+            <% } %>
 
-        <!-- User Management (Admin Only) -->
-        <% if (user.role === 'COMPANY_ADMIN') { %>
-        <div class="card">
-            <h2>Staff & Users</h2>
-            <p>Add new trainers, register students, and manage employee permissions.</p>
-            <div class="mt-20">
-                <a href="<%= tenantUrl('/users') %>" class="btn">Manage Users</a>
+            <div class="card">
+                <h3>Quick Actions</h3>
+                <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
+                    <a href="<%= tenantUrl('/enrollments') %>" class="btn" style="background: #f8f9fa; color: #333; border: 1px solid #ddd; text-align: left;">➕ New Enrollment</a>
+                    <a href="<%= tenantUrl('/vehicles') %>" class="btn" style="background: #f8f9fa; color: #333; border: 1px solid #ddd; text-align: left;">🚗 Add Vehicle</a>
+                    <a href="<%= tenantUrl('/users') %>" class="btn" style="background: #f8f9fa; color: #333; border: 1px solid #ddd; text-align: left;">👤 Manage Staff</a>
+                </div>
             </div>
-        </div>
-        <% } %>
+        </section>
     </div>
-
-    <!-- Quick Links for Trainers/Students -->
-    <% if (user.role === 'TRAINER' || user.role === 'CUSTOMER') { %>
-    <section class="card">
-        <h3>Your Upcoming Schedule</h3>
-        <p>No lessons scheduled for today.</p>
-    </section>
-    <% } %>
 </div>

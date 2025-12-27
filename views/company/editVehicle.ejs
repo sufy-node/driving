@@ -1,0 +1,32 @@
+<div class="container">
+    <header class="mb-20">
+        <h1>Edit Vehicle: <%= vehicle.name %></h1>
+        <p>Update details for vehicle ID <code>#<%= vehicle._id %></code></p>
+    </header>
+
+    <section class="card" style="max-width: 600px; margin: 0 auto;">
+        <form action="<%= tenantUrl('/vehicles/edit/' + vehicle._id) %>" method="POST">
+            <div style="margin-bottom: 20px;">
+                <label>Vehicle Name / Model</label>
+                <input type="text" name="name" value="<%= vehicle.name %>" required style="width: 100%;">
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label>Plate Number</label>
+                <input type="text" name="plateNumber" value="<%= vehicle.plateNumber %>" required style="width: 100%;">
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                    <input type="checkbox" name="isActive" <%= vehicle.isActive ? 'checked' : '' %>>
+                    <span>Vehicle is Active and Available for Lessons</span>
+                </label>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 30px;">
+                <button type="submit" class="btn-success" style="flex: 2;">Update Vehicle</button>
+                <a href="<%= tenantUrl('/vehicles') %>" class="btn" style="flex: 1; background: #666;">Cancel</a>
+            </div>
+        </form>
+    </section>
+</div>

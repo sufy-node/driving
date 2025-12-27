@@ -1,0 +1,78 @@
+<div class="container">
+    <header class="mb-20" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+        <div>
+            <h1>School Configuration</h1>
+            <p>Manage branding and contact information for <strong><%= tenant.name %></strong></p>
+        </div>
+        <a href="<%= tenantUrl('/dashboard') %>" class="btn">Back to Dashboard</a>
+    </header>
+
+    <div class="grid" style="grid-template-columns: 1.5fr 1fr; gap: 30px;">
+        
+        <!-- Settings Form -->
+        <section class="card">
+            <form action="<%= tenantUrl('/settings/update') %>" method="POST">
+                <h3 style="margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px;">General Identity</h3>
+                
+                <div style="margin-bottom: 20px;">
+                    <label>Driving School Name</label>
+                    <input type="text" name="name" value="<%= tenant.name %>" required style="width: 100%;">
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label>Primary Brand Color</label>
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <input type="color" name="primaryColor" value="<%= tenant.primaryColor %>" style="width: 60px; height: 45px; padding: 2px; cursor: pointer;">
+                        <p style="font-size: 0.85rem; color: #666;">This color will be used for buttons, navigation, and highlights.</p>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 40px; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px;">Contact Details</h3>
+
+                <div style="margin-bottom: 20px;">
+                    <label>Official Email Address</label>
+                    <input type="email" name="email" value="<%= tenant.settings?.email || '' %>" placeholder="contact@school.com" style="width: 100%;">
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label>Phone Number</label>
+                    <input type="text" name="phone" value="<%= tenant.settings?.phone || '' %>" placeholder="+1 234 567 890" style="width: 100%;">
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label>Physical Address</label>
+                    <textarea name="address" rows="3" style="width: 100%;" placeholder="123 Driving Lane, City, Country"><%= tenant.settings?.address || '' %></textarea>
+                </div>
+
+                <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+                    <button type="submit" class="btn-success" style="padding: 12px 30px;">Save Configuration</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Preview Card -->
+        <section style="display: flex; flex-direction: column; gap: 20px;">
+            <div class="card" style="background: #f8fafc; border: 1px dashed #cbd5e1;">
+                <h3>Branding Preview</h3>
+                <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 20px;">This is how your selected color looks on UI elements.</p>
+                
+                <div style="background: var(--primary-color); color: white; padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 15px;">
+                    Navigation Bar Example
+                </div>
+                
+                <button class="btn" style="width: 100%; margin-bottom: 10px;">Primary Button</button>
+                
+                <div style="display: flex; gap: 5px; justify-content: center;">
+                    <span class="badge" style="background: var(--primary-color); color: white;">Badge</span>
+                    <span style="color: var(--primary-color); font-weight: bold;">Link Text</span>
+                </div>
+            </div>
+
+            <div class="card" style="border-left: 5px solid var(--warning-color);">
+                <h3>Pro Tip</h3>
+                <p style="font-size: 0.9rem; line-height: 1.5;">Ensure your brand color has enough contrast with white text to remain readable for your trainers and students.</p>
+            </div>
+        </section>
+
+    </div>
+</div>
