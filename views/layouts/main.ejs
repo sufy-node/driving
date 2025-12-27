@@ -2,49 +2,98 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= title %> | Driving School SaaS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title><%= title %> | Driving SaaS Pro</title>
     <link rel="stylesheet" href="/css/style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* If a company is logged in, use their primary color, otherwise use default SaaS blue */
-            --primary-color: <%= (locals.tenant && tenant.primaryColor) ? tenant.primaryColor : '#2c3e50' %>;
+            --primary-color: <%= (locals.tenant && tenant.primaryColor) ? tenant.primaryColor : '#2563eb' %>;
+            --secondary-color: <%= (locals.tenant && tenant.secondaryColor) ? tenant.secondaryColor : '#64748b' %>;
+            --accent-color: <%= (locals.tenant && tenant.accentColor) ? tenant.accentColor : '#6366f1' %>;
         }
     </style>
 </head>
 <body>
     <nav>
         <div class="container">
-            <div class="nav-brand">
-                <a href="/" style="font-size: 1.4rem; letter-spacing: -1px;">
-                    DRIVE<strong>SAAS</strong>
-                </a>
+            <a href="/" class="nav-brand">DRIVE<strong>SAAS</strong> <span>PRO</span></a>
+
+            <div class="menu-toggle" id="mobile-menu">
+                <span></span><span></span><span></span>
             </div>
-            <div class="nav-links">
+
+            <div class="nav-links" id="nav-list">
                 <% if (locals.user) { %>
+                    
                     <% if (user.role === 'SUPER_ADMIN') { %>
-                        <a href="/superadmin/dashboard">Global Admin</a>
-                    <% } else { %>
-                        <a href="<%= tenantUrl('/dashboard') %>">Dashboard</a>
+                        <a href="/superadmin/dashboard" style="color: var(--warning-color);">★ Global Panel</a>
                     <% } %>
-                    <a href="/auth/logout" style="background: rgba(255,255,255,0.1); padding: 5px 15px; border-radius: 20px;">Logout</a>
+
+                    <% if (locals.tenant && typeof tenantUrl !== 'undefined') { %>
+                        
+                        <!-- Trainer Navigation -->
+                        <% if (user.role === 'TRAINER') { %>
+                            <a href="<%= tenantUrl('/trainer/dashboard') %>">Today's Tasks</a>
+                            <a href="<%= tenantUrl('/attendance') %>">Schedule Explorer</a>
+                        <% } %>
+
+                        <!-- Admin Navigation -->
+                        <% if (user.role === 'COMPANY_ADMIN' || user.role === 'SUPER_ADMIN') { %>
+                            <a href="<%= tenantUrl('/dashboard') %>">Dashboard</a>
+                            <a href="<%= tenantUrl('/attendance') %>">Attendance</a>
+                            <a href="<%= tenantUrl('/enrollments') %>">Enrollments</a>
+                            <% if (tenant.enabledModules?.payments) { %>
+                                <a href="<%= tenantUrl('/payments') %>">Payments</a>
+                            <% } %>
+                            <a href="<%= tenantUrl('/vehicles') %>">Vehicles</a>
+                            <a href="<%= tenantUrl('/users') %>">Users</a>
+                            <% if (tenant.enabledModules?.reporting) { %>
+                                <a href="<%= tenantUrl('/reports') %>">Reports</a>
+                            <% } %>
+                            <a href="<%= tenantUrl('/settings') %>">Settings</a>
+                        <% } %>
+                    <% } %>
+
+                    <a href="/auth/logout" class="btn-danger" style="color: white; margin-left: 10px;">Logout</a>
                 <% } else { %>
-                    <a href="/auth/login">Login</a>
+                    <a href="/auth/login" class="btn-primary">Login</a>
                 <% } %>
             </div>
         </div>
     </nav>
 
-    <main>
+    <main class="container" style="margin-top: 30px;">
         <%- body %>
     </main>
 
-    <footer style="text-align: center; padding: 40px 0; color: #888; font-size: 0.9rem;">
-        <p>&copy; 2024 Driving School Management System. All Rights Reserved.</p>
+    <footer style="text-align: center; padding: 40px 0; color: var(--secondary-color); font-size: 0.8rem; border-top: 1px solid var(--gray-200); margin-top: 50px;">
+        <p>&copy; 2025 <%= locals.tenant ? tenant.name : 'Driving School Management SaaS' %>. All Rights Reserved.</p>
     </footer>
+
+    <script>
+        const menuToggle = document.getElementById('mobile-menu');
+        const navList = document.getElementById('nav-list');
+        menuToggle.addEventListener('click', () => {
+            navList.classList.toggle('active');
+        });
+
+        const Toast = Swal.mixin({
+            toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, timerProgressBar: true
+        });
+
+        const successMsg = "<%= success %>";
+        const errorMsg = "<%= error %>";
+        if (successMsg && successMsg !== 'null' && successMsg !== 'undefined') Toast.fire({ icon: 'success', title: successMsg });
+        if (errorMsg && errorMsg !== 'null' && errorMsg !== 'undefined') Toast.fire({ icon: 'error', title: errorMsg });
+
+        if (window.history.replaceState) {
+            const url = new URL(window.location);
+            url.searchParams.delete('success');
+            url.searchParams.delete('error');
+            window.history.replaceState({}, document.title, url);
+        }
+    </script>
 </body>
 </html>

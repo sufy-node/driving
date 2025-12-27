@@ -1,114 +1,166 @@
 <div class="container">
-    <header class="mb-20">
-        <h1>Super Admin Control Panel</h1>
-        <% if (locals.success) { %>
-            <div style="background: #d4edda; color: #155724; padding: 10px; border-radius: 5px; margin-bottom: 15px;">
-                <%= success %>
-            </div>
-        <% } %>
+    <header class="mb-20" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 20px;">
+        <div>
+            <h1 style="font-size: 2.2rem; letter-spacing: -1px;">Global Control Center</h1>
+            <p style="color: #666;">System Health: <span style="color: var(--success-color); font-weight: bold;">● Operational</span></p>
+        </div>
+        <div style="text-align: right;">
+            <p style="font-size: 0.9rem; color: #888;">Logged in as <strong>System Admin</strong></p>
+        </div>
     </header>
 
-    <section class="grid">
-        <div class="card">
-            <h3>Total Schools</h3>
-            <p style="font-size: 2rem; font-weight: bold;"><%= companies.length %></p>
+    <!-- Top Level KPI Cards -->
+    <section class="grid" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));">
+        <div class="card" style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%); color: white; border: none;">
+            <small style="opacity: 0.7; text-transform: uppercase; font-weight: bold;">Total Driving Schools</small>
+            <h2 style="font-size: 2.5rem; margin: 10px 0;"><%= stats.totalCompanies %></h2>
+            <div style="font-size: 0.8rem; background: rgba(255,255,255,0.1); padding: 5px; border-radius: 4px;">
+                Adoption Rate: <%= stats.moduleStats.bookings %>% Bookings
+            </div>
         </div>
         <div class="card">
-            <h3>Total Platform Users</h3>
-            <p style="font-size: 2rem; font-weight: bold;"><%= totalUsers %></p>
+            <small style="color: #888; text-transform: uppercase; font-weight: bold;">Active Students</small>
+            <h2 style="font-size: 2.5rem; margin: 10px 0; color: var(--primary-color);"><%= stats.totalUsers %></h2>
+            <p style="font-size: 0.85rem; color: #666;">Across all registered schools</p>
+        </div>
+        <div class="card">
+            <small style="color: #888; text-transform: uppercase; font-weight: bold;">Total Lessons Logged</small>
+            <h2 style="font-size: 2.5rem; margin: 10px 0; color: var(--success-color);"><%= stats.totalSessions %></h2>
+            <p style="font-size: 0.85rem; color: #666;">All-time platform activity</p>
+        </div>
+        <div class="card">
+            <small style="color: #888; text-transform: uppercase; font-weight: bold;">Active Enrollments</small>
+            <h2 style="font-size: 2.5rem; margin: 10px 0; color: #f59e0b;"><%= stats.activeEnrollments %></h2>
+            <p style="font-size: 0.85rem; color: #666;">Ongoing 15-day plans</p>
         </div>
     </section>
 
-    <div class="grid">
-        <section class="card">
-            <h2>Register New Driving School</h2>
-            <form action="/superadmin/companies/create" method="POST">
-                <input type="text" name="name" placeholder="School Name" required>
-                <input type="text" name="subdomain" placeholder="URL Slug (e.g. alpha)" required>
-                <hr>
-                <input type="email" name="adminEmail" placeholder="Admin Email" required>
-                <input type="password" name="adminPassword" placeholder="Admin Password" required>
-                <button type="submit" class="btn-success">Create School & Admin</button>
-            </form>
+    <div class="grid" style="grid-template-columns: 1.5fr 1fr; margin-top: 30px;">
+        
+        <!-- Left Column: School Management -->
+        <section>
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2>Managed Schools</h2>
+                    <div id="status-msg" style="font-size: 0.8rem; color: var(--success-color); font-weight: bold;"></div>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>School Name</th>
+                                <th>Modules</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% companies.forEach(company => { %>
+                                <tr>
+                                    <td>
+                                        <strong><%= company.name %></strong><br>
+                                        <code style="font-size: 0.75rem;">/c/<%= company.subdomain %></code>
+                                    </td>
+                                    <td>
+                                        <div style="display: flex; gap: 8px;">
+                                            <label class="module-pill">
+                                                <input type="checkbox" <%= (company.enabledModules?.payments) ? 'checked' : '' %> onchange="updateModule('<%= company._id %>', 'payments', this.checked)"> Pay
+                                            </label>
+                                            <label class="module-pill">
+                                                <input type="checkbox" <%= (company.enabledModules?.bookings) ? 'checked' : '' %> onchange="updateModule('<%= company._id %>', 'bookings', this.checked)"> Book
+                                            </label>
+                                            <label class="module-pill">
+                                                <input type="checkbox" <%= (company.enabledModules?.reporting) ? 'checked' : '' %> onchange="updateModule('<%= company._id %>', 'reporting', this.checked)"> Rep
+                                            </label>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <a href="/superadmin/access/<%= company._id %>" class="btn" style="padding: 6px 12px; font-size: 0.75rem; background: #334155;">Login as Admin</a>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </section>
 
-        <section class="card">
-            <h2>Module Management</h2>
-            <p>Toggling these switches will instantly enable or disable features for the specific driving school.</p>
-            <div id="status-msg" style="margin-top: 10px; font-weight: bold; color: var(--success-color);"></div>
+        <!-- Right Column: Onboarding & Activity -->
+        <section style="display: flex; flex-direction: column; gap: 30px;">
+            
+            <!-- Onboarding Form -->
+            <div class="card" style="border-top: 4px solid var(--primary-color);">
+                <h3>Onboard New School</h3>
+                <p style="font-size: 0.85rem; color: #666; margin-bottom: 20px;">Create a new tenant and primary admin account.</p>
+                <form action="/superadmin/companies/create" method="POST">
+                    <input type="text" name="name" placeholder="Driving School Name" required>
+                    <input type="text" name="subdomain" placeholder="URL Slug (e.g. elite-drive)" required>
+                    <hr style="margin: 10px 0; opacity: 0.1;">
+                    <input type="email" name="adminEmail" placeholder="Admin Email Address" required>
+                    <input type="password" name="adminPassword" placeholder="Admin Password" required>
+                    <button type="submit" class="btn-success" style="width: 100%; margin-top: 10px;">Provision School</button>
+                </form>
+            </div>
+
+            <!-- Module Adoption Chart (Simulated) -->
+            <div class="card">
+                <h3>Module Adoption</h3>
+                <div style="margin-top: 20px;">
+                    <small>Payments Integration</small>
+                    <div class="progress-bar"><div style="width: <%= stats.moduleStats.payments %>%"></div></div>
+                    
+                    <small>Reporting & Analytics</small>
+                    <div class="progress-bar"><div style="width: <%= stats.moduleStats.reporting %>%" style="background: #10b981;"></div></div>
+                </div>
+            </div>
+
         </section>
     </div>
-
-    <section class="card">
-        <h2>Managed Driving Schools</h2>
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>School Name</th>
-                        <th>Path</th>
-                        <th>Modules</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% companies.forEach(company => { %>
-                        <tr>
-                            <td><code>#<%= company._id %></code></td>
-                            <td><strong><%= company.name %></strong></td>
-                            <td><code>/c/<%= company.subdomain %></code></td>
-                            <td>
-                                <div style="display: flex; gap: 15px;">
-                                    <label style="cursor: pointer;">
-                                        <input type="checkbox" 
-                                        <%= (company.enabledModules && company.enabledModules.payments) ? 'checked' : '' %> 
-                                        onchange="updateModule('<%= company._id %>', 'payments', this.checked)">
-                                        Payments
-                                    </label>
-                                    <label style="cursor: pointer;">
-                                        <input type="checkbox" 
-                                        <%= (company.enabledModules && company.enabledModules.bookings) ? 'checked' : '' %> 
-                                        onchange="updateModule('<%= company._id %>', 'bookings', this.checked)">
-                                        Bookings
-                                    </label>
-                                </div>
-                            </td>
-                            <td>
-                                <a href="/superadmin/access/<%= company._id %>" class="btn" style="padding: 5px 10px; font-size: 0.8rem;">Login as Admin</a>
-                            </td>
-                        </tr>
-                    <% }) %>
-                </tbody>
-            </table>
-        </div>
-    </section>
 </div>
+
+<style>
+    .module-pill {
+        font-size: 0.7rem;
+        background: #f1f5f9;
+        padding: 4px 8px;
+        border-radius: 4px;
+        cursor: pointer;
+        border: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .module-pill:hover { background: #e2e8f0; }
+    .progress-bar {
+        background: #f1f5f9;
+        height: 8px;
+        border-radius: 10px;
+        margin: 8px 0 15px 0;
+        overflow: hidden;
+    }
+    .progress-bar div {
+        background: var(--primary-color);
+        height: 100%;
+    }
+</style>
 
 <script>
 async function updateModule(companyId, moduleName, status) {
     const msgDiv = document.getElementById('status-msg');
-    msgDiv.innerText = "Updating...";
-    
+    msgDiv.innerText = "Syncing...";
     try {
         const response = await fetch('/superadmin/companies/toggle-module', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ companyId, moduleName, status })
         });
-        
         const result = await response.json();
-        
         if (result.success) {
-            msgDiv.innerText = "✓ " + result.message;
-            setTimeout(() => { msgDiv.innerText = ""; }, 3000);
-        } else {
-            alert('Error: ' + result.message);
-            msgDiv.innerText = "Failed to update.";
+            msgDiv.innerText = "✓ " + moduleName.toUpperCase() + " UPDATED";
+            setTimeout(() => { msgDiv.innerText = ""; }, 2000);
         }
-    } catch (err) {
-        console.error(err);
-        alert('Connection error');
+    } catch (err) { 
+        msgDiv.innerText = "Error!";
+        Toast.fire({ icon: 'error', title: 'Failed to update module' });
     }
 }
 </script>

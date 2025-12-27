@@ -2,34 +2,42 @@ import Company from '../models/Company.js';
 import { findOneRecord } from '../services/dbService.js';
 
 export const identifyTenant = async (req, res, next) => {
-    // We look for /c/:companySlug in the URL
-    const pathParts = req.path.split('/');
+    // 1. Try to get slug from params (Express standard)
+    // 2. Fallback: Extract from path manually if params are empty
+    let slug = req.params.companySlug;
     
-    // If the URL starts with /c/ we extract the next part as the company slug
-    if (pathParts[1] === 'c' && pathParts[2]) {
-        const slug = pathParts[2].toLowerCase();
-        
-        try {
-            const company = await findOneRecord(Company, { subdomain: slug, isActive: true });
-            
-            if (!company) {
-                return res.status(404).render('error', { message: 'Driving School not found' });
-            }
-
-            req.tenant = company;
-            res.locals.tenant = company; // For EJS
-            req.isMainDomain = false;
-            
-            // Helper to build URLs easily in EJS
-            res.locals.tenantUrl = (path) => `/c/${slug}${path}`;
-            
-            return next();
-        } catch (error) {
-            return next(error);
+    if (!slug) {
+        const parts = req.path.split('/');
+        if (parts[1] === 'c' && parts[2]) {
+            slug = parts[2];
         }
     }
 
-    // If not a company path, it's a global path (Super Admin or Landing)
-    req.isMainDomain = true;
-    next();
+    if (!slug) {
+        req.isMainDomain = true;
+        return next();
+    }
+
+    try {
+        const company = await findOneRecord(Company, { subdomain: slug.toLowerCase(), isActive: true });
+        
+        if (!company) {
+            return res.status(404).render('error', { 
+                title: 'School Not Found', 
+                message: 'The driving school you are looking for does not exist.' 
+            });
+        }
+
+        // Attach company info
+        req.tenant = company;
+        res.locals.tenant = company; 
+        req.isMainDomain = false;
+        
+        // Helper for URLs
+        res.locals.tenantUrl = (path) => `/c/${slug}${path}`;
+        
+        next();
+    } catch (error) {
+        next(error);
+    }
 };

@@ -18,9 +18,10 @@ export const protect = async (req, res, next) => {
         if (!user) return res.redirect('/auth/login');
 
         // Security Check: Ensure user belongs to the current tenant
+        // SUPER_ADMIN is allowed to enter ANY company path
         if (!req.isMainDomain && user.role !== 'SUPER_ADMIN') {
             if (user.companyId !== req.tenant._id) {
-                return res.status(403).send('Unauthorized access to this company.');
+                return res.status(403).send('Unauthorized access: This account does not belong to this school.');
             }
         }
 
@@ -36,7 +37,7 @@ export const protect = async (req, res, next) => {
 // 2. Just check if user exists (for UI/Navbars/Error pages)
 export const checkUser = async (req, res, next) => {
     const token = req.cookies.jwt;
-    res.locals.user = null; // Default
+    res.locals.user = null;
 
     if (token) {
         try {
@@ -62,11 +63,20 @@ export const checkUser = async (req, res, next) => {
     next();
 };
 
-// 3. Role-Based Access Control
+// 3. Role-Based Access Control (RBAC)
 export const authorize = (...roles) => {
     return (req, res, next) => {
+        // GOD MODE: If user is SUPER_ADMIN, they can access EVERYTHING
+        if (req.user.role === 'SUPER_ADMIN') {
+            return next();
+        }
+
+        // Otherwise, check if their role is in the allowed list
         if (!roles.includes(req.user.role)) {
-            return res.status(403).send('You do not have permission to perform this action');
+            return res.status(403).render('error', { 
+                title: 'Access Denied', 
+                message: 'You do not have permission to perform this action.' 
+            });
         }
         next();
     };

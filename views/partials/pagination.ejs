@@ -1,0 +1,63 @@
+<% if (pagination && pagination.totalPages > 1) { %>
+    <div class="pagination-wrapper mt-30" style="display: flex; justify-content: center; align-items: center; gap: 5px; margin-top: 30px;">
+        
+        <!-- First Page -->
+        <% if (pagination.page > 1) { %>
+            <a href="?page=1" class="btn-pagination" title="First Page">&laquo;&laquo;</a>
+            <a href="?page=<%= pagination.page - 1 %>" class="btn-pagination" title="Previous">&laquo;</a>
+        <% } %>
+
+        <% 
+            // Logic for sliding window (show 2 pages before and 2 after)
+            let start = Math.max(1, pagination.page - 2);
+            let end = Math.min(pagination.totalPages, pagination.page + 2);
+            
+            if (start > 1) { %>
+                <span class="pagination-dots">...</span>
+            <% }
+
+            for (let i = start; i <= end; i++) { %>
+                <a href="?page=<%= i %>" 
+                   class="btn-pagination <%= pagination.page === i ? 'active' : '' %>">
+                    <%= i %>
+                </a>
+            <% }
+
+            if (end < pagination.totalPages) { %>
+                <span class="pagination-dots">...</span>
+            <% }
+        %>
+
+        <!-- Next & Last Page -->
+        <% if (pagination.page < pagination.totalPages) { %>
+            <a href="?page=<%= pagination.page + 1 %>" class="btn-pagination" title="Next">&raquo;</a>
+            <a href="?page=<%= pagination.totalPages %>" class="btn-pagination" title="Last Page">&raquo;&raquo;</a>
+        <% } %>
+    </div>
+
+    <style>
+        .btn-pagination {
+            padding: 8px 14px;
+            border: 1px solid #ddd;
+            background: white;
+            color: var(--primary-color);
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .btn-pagination:hover {
+            background: #f4f4f4;
+            border-color: var(--primary-color);
+        }
+        .btn-pagination.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        .pagination-dots {
+            padding: 0 10px;
+            color: #999;
+        }
+    </style>
+<% } %>

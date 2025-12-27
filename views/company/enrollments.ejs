@@ -1,0 +1,123 @@
+<div class="container">
+    <header class="mb-20" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-top: 20px;">
+        <div>
+            <h1 style="font-size: 2rem; letter-spacing: -1px;">Student Enrollments</h1>
+            <p style="color: var(--secondary-color);">Create training plans and generate schedules</p>
+        </div>
+        <a href="<%= tenantUrl('/dashboard') %>" class="btn btn-outline" style="border: 1px solid var(--gray-200);">Back to Dashboard</a>
+    </header>
+
+    <!-- Section 1: New Enrollment Form -->
+    <section class="card mb-30" style="border-top: 4px solid var(--primary-color);">
+        <h2 style="margin-bottom: 25px; font-size: 1.25rem;">Assign New Training Plan</h2>
+        <form action="<%= tenantUrl('/enrollments/add') %>" method="POST">
+            
+            <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
+                <div class="form-group">
+                    <label>Select Student</label>
+                    <select name="studentId" required>
+                        <option value="">-- Choose Student --</option>
+                        <% students.forEach(s => { %>
+                            <option value="<%= s._id %>"><%= s.name %></option>
+                        <% }) %>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Assign Trainer</label>
+                    <select name="trainerId" required>
+                        <option value="">-- Choose Trainer --</option>
+                        <% trainers.forEach(t => { %>
+                            <option value="<%= t._id %>"><%= t.name %></option>
+                        <% }) %>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Assign Vehicle</label>
+                    <select name="vehicleId" required>
+                        <option value="">-- Choose Vehicle --</option>
+                        <% vehicles.forEach(v => { %>
+                            <option value="<%= v._id %>"><%= v.name %> (<%= v.plateNumber %>)</option>
+                        <% }) %>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Total Plan Price (Fees)</label>
+                    <input type="number" name="totalPrice" placeholder="e.g. 5000" required>
+                </div>
+            </div>
+
+            <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-top: 10px;">
+                <div class="form-group">
+                    <label>Plan Duration (Days)</label>
+                    <input type="number" name="planDays" value="15" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label>Start Date</label>
+                    <input type="date" name="startDate" required>
+                </div>
+                <div class="form-group">
+                    <label>Daily Start Time</label>
+                    <input type="time" name="startTime" required>
+                </div>
+                <div class="form-group">
+                    <label>Daily End Time</label>
+                    <input type="time" name="endTime" required>
+                </div>
+            </div>
+
+            <div class="form-group" style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
+                <input type="checkbox" name="skipSundays" id="skipSun" checked style="width: 20px; height: 20px; cursor: pointer;">
+                <label for="skipSun" style="margin-bottom: 0; cursor: pointer;">Skip Sundays automatically</label>
+            </div>
+
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--gray-100);">
+                <button type="submit" class="btn btn-primary" style="padding: 14px 40px;">
+                    Generate Training Schedule
+                </button>
+            </div>
+        </form>
+    </section>
+
+    <!-- Section 2: Active Enrollments List -->
+    <section class="card">
+        <h2 style="margin-bottom: 20px; font-size: 1.25rem;">Active Training Plans</h2>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Trainer</th>
+                        <th>Vehicle</th>
+                        <th>Plan Price</th>
+                        <th>Progress</th>
+                        <th style="text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (enrollments.length === 0) { %>
+                        <tr><td colspan="6" class="text-center" style="padding: 40px; color: var(--secondary-color);">No active enrollments found.</td></tr>
+                    <% } %>
+                    <% enrollments.forEach(e => { %>
+                        <tr>
+                            <td><strong><%= e.studentId?.name %></strong></td>
+                            <td><%= e.trainerId?.name %></td>
+                            <td><small><%= e.vehicleId?.name %></small></td>
+                            <td><strong>$<%= e.totalPrice?.toLocaleString() %></strong></td>
+                            <td>
+                                <% let progress = Math.round((e.completedDays / e.planDays) * 100); %>
+                                <div style="background: var(--gray-100); border-radius: 10px; height: 8px; width: 100px; overflow: hidden; margin-bottom: 4px;">
+                                    <div style="background: var(--primary-color); height: 100%; width: <%= progress %>%;"></div>
+                                </div>
+                                <small style="font-size: 0.75rem; color: var(--secondary-color);"><%= e.completedDays %> / <%= e.planDays %> Days</small>
+                            </td>
+                            <td style="text-align: right;">
+                                <a href="<%= tenantUrl('/enrollments/progress/' + e._id) %>" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.8rem;">View Card</a>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+        <%- include('../partials/pagination') %>
+    </section>
+</div>

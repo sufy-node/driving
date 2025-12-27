@@ -1,0 +1,32 @@
+<div class="container">
+    <header class="mb-20" style="margin-top: 20px;">
+        <h1 style="font-size: 2rem; letter-spacing: -1px;">Edit Vehicle</h1>
+        <p style="color: var(--secondary-color);">Updating details for <strong><%= vehicle.name %></strong></p>
+    </header>
+
+    <section class="card" style="max-width: 600px; margin: 0 auto; border-top: 4px solid var(--accent-color);">
+        <form action="<%= tenantUrl('/vehicles/edit/' + vehicle._id) %>" method="POST">
+            <div class="form-group">
+                <label>Vehicle Name / Model</label>
+                <input type="text" name="name" value="<%= vehicle.name %>" required>
+            </div>
+
+            <div class="form-group">
+                <label>Plate Number</label>
+                <input type="text" name="plateNumber" value="<%= vehicle.plateNumber %>" required>
+            </div>
+
+            <div class="form-group" style="background: var(--gray-50); padding: 15px; border-radius: 8px; margin-top: 10px;">
+                <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; margin-bottom: 0;">
+                    <input type="checkbox" name="isActive" <%= vehicle.isActive ? 'checked' : '' %> style="width: 20px; height: 20px; cursor: pointer;">
+                    <span style="font-weight: 600;">Vehicle is Active and Available for Lessons</span>
+                </label>
+            </div>
+
+            <div style="display: flex; gap: 12px; margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--gray-100);">
+                <button type="submit" class="btn btn-primary" style="flex: 2;">Update Vehicle</button>
+                <a href="<%= tenantUrl('/vehicles') %>" class="btn btn-outline" style="flex: 1; text-align: center;">Cancel</a>
+            </div>
+        </form>
+    </section>
+</div>

@@ -1,0 +1,144 @@
+<div class="container">
+    <header class="mb-20" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-top: 20px;">
+        <div>
+            <h1 style="font-size: 2rem; letter-spacing: -1px;">Financial Ledger</h1>
+            <p style="color: var(--secondary-color);">Track payments, advances, and balances</p>
+        </div>
+        <a href="<%= tenantUrl('/dashboard') %>" class="btn btn-outline">Back to Dashboard</a>
+    </header>
+
+    <div class="grid" style="grid-template-columns: 1fr 2.5fr;">
+        
+        <!-- Section 1: Record New Payment Form -->
+        <section class="card" style="height: fit-content; border-top: 4px solid var(--success-color);">
+            <h2 style="margin-bottom: 25px; font-size: 1.25rem;">Record Payment</h2>
+            <form action="<%= tenantUrl('/payments/add') %>" method="POST">
+                <div class="form-group">
+                    <label>Select Student Plan</label>
+                    <select name="enrollmentId" required onchange="updateBalance(this)">
+                        <option value="">-- Choose Student --</option>
+                        <% enrollments.forEach(e => { %>
+                            <option value="<%= e._id %>" data-balance="<%= e.balance %>">
+                                <%= e.studentId?.name %> (Due: $<%= e.balance.toLocaleString() %>)
+                            </option>
+                        <% }) %>
+                    </select>
+                </div>
+
+                <div id="balance-info" style="background: #fff1f2; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: none; border: 1px solid #fecdd3;">
+                    <small style="color: #991b1b; font-weight: bold; text-transform: uppercase; font-size: 0.7rem;">Remaining Balance:</small>
+                    <h3 id="display-balance" style="color: var(--danger-color); margin-top: 5px; font-size: 1.5rem; font-weight: 800;">$0.00</h3>
+                </div>
+
+                <div class="form-group">
+                    <label>Amount Received</label>
+                    <input type="number" name="amount" placeholder="0.00" required step="0.01">
+                </div>
+
+                <div class="form-group">
+                    <label>Payment Method</label>
+                    <select name="method" required>
+                        <option value="CASH">Cash</option>
+                        <option value="ONLINE">Online Transfer</option>
+                        <option value="BANK_TRANSFER">Bank Deposit</option>
+                        <option value="CHEQUE">Cheque</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Payment Date</label>
+                    <input type="date" name="paymentDate" value="<%= new Date().toISOString().split('T')[0] %>">
+                </div>
+
+                <div class="form-group">
+                    <label>Internal Notes / Reference</label>
+                    <textarea name="notes" rows="3" placeholder="e.g. Receipt #1234, Advance for 15-day plan"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-success" style="width: 100%; padding: 14px; font-weight: bold; margin-top: 10px;">
+                    Save Transaction
+                </button>
+            </form>
+        </section>
+
+        <!-- Section 2: Global Payment History -->
+        <section class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px;">
+                <h2 style="font-size: 1.25rem;">Transaction History</h2>
+                
+                <!-- Filter Form -->
+                <form action="<%= tenantUrl('/payments') %>" method="GET" style="display: flex; gap: 10px; align-items: center;">
+                    <select name="studentId" style="margin-bottom: 0; width: 200px; padding: 8px;">
+                        <option value="">-- All Students --</option>
+                        <% students.forEach(s => { %>
+                            <option value="<%= s._id %>" <%= selectedStudent === s._id ? 'selected' : '' %>><%= s.name %></option>
+                        <% }) %>
+                    </select>
+                    <button type="submit" class="btn btn-outline" style="padding: 8px 15px;">Filter</button>
+                    <% if (selectedStudent) { %>
+                        <a href="<%= tenantUrl('/payments') %>" style="font-size: 0.8rem; color: var(--danger-color); font-weight: 600;">Clear</a>
+                    <% } %>
+                </form>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date & Ref</th>
+                            <th>Student</th>
+                            <th>Amount</th>
+                            <th>Method</th>
+                            <th>Recorded By</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (payments.length === 0) { %>
+                            <tr><td colspan="6" class="text-center" style="padding: 40px; color: var(--secondary-color);">No transactions found.</td></tr>
+                        <% } %>
+                        <% payments.forEach(p => { %>
+                            <tr>
+                                <td>
+                                    <div style="font-weight: 600;"><%= new Date(p.paymentDate).toLocaleDateString() %></div>
+                                    <code style="font-size: 0.7rem; color: var(--secondary-color);">#<%= p._id.substring(0,8).toUpperCase() %></code>
+                                </td>
+                                <td><strong><%= p.studentId?.name %></strong></td>
+                                <td style="font-weight: 800; color: var(--success-color);">
+                                    $<%= p.amount.toLocaleString() %>
+                                </td>
+                                <td><span class="badge" style="background: var(--gray-100); color: var(--gray-800); border: 1px solid var(--gray-200);"><%= p.method %></span></td>
+                                <td>
+                                    <div style="font-weight: 600; font-size: 0.85rem;"><%= p.recordedBy?.name || 'System' %></div>
+                                    <small style="color: var(--secondary-color); font-size: 0.7rem;"><%= p.recordedBy?.role %></small>
+                                </td>
+                                <td>
+                                    <small style="color: var(--secondary-color); display: block; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="<%= p.notes %>">
+                                        <%= p.notes || '-' %>
+                                    </small>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+            <%- include('../partials/pagination') %>
+        </section>
+    </div>
+</div>
+
+<script>
+function updateBalance(select) {
+    const info = document.getElementById('balance-info');
+    const display = document.getElementById('display-balance');
+    const selected = select.options[select.selectedIndex];
+    
+    if (selected.value && selected.getAttribute('data-balance')) {
+        const balance = selected.getAttribute('data-balance');
+        display.innerText = '$' + Number(balance).toLocaleString(undefined, {minimumFractionDigits: 2});
+        info.style.display = 'block';
+    } else {
+        info.style.display = 'none';
+    }
+}
+</script>
