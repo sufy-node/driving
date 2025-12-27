@@ -1,35 +1,35 @@
 <div class="container">
-    <header class="mb-20" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+    <header class="mb-20" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-top: 20px;">
         <div>
             <h1 style="font-size: 2rem; letter-spacing: -1px;">User Management</h1>
-            <p style="color: #666;">Manage staff, trainers, and students for <strong><%= tenant.name %></strong></p>
+            <p style="color: var(--secondary-color);">Manage staff, trainers, and students</p>
         </div>
-        <a href="<%= tenantUrl('/dashboard') %>" class="btn">Back to Dashboard</a>
+        <a href="<%= tenantUrl('/dashboard') %>" class="btn btn-outline">Back to Dashboard</a>
     </header>
 
     <!-- Section 1: Add New User Form -->
     <section class="card mb-30" style="border-top: 4px solid var(--primary-color);">
-        <h2 style="margin-bottom: 20px;">Register New Member</h2>
+        <h2 style="margin-bottom: 25px; font-size: 1.25rem;">Register New Member</h2>
         <form action="<%= tenantUrl('/users/add') %>" method="POST">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
-                <div>
-                    <label style="font-weight: 600;">Full Name</label>
+            <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
+                <div class="form-group">
+                    <label>Full Name</label>
                     <input type="text" name="name" placeholder="e.g. John Doe" required>
                 </div>
-                <div>
-                    <label style="font-weight: 600;">Email Address</label>
+                <div class="form-group">
+                    <label>Email Address</label>
                     <input type="email" name="email" placeholder="e.g. john@example.com" required>
                 </div>
-                <div>
-                    <label style="font-weight: 600;">Phone Number</label>
+                <div class="form-group">
+                    <label>Phone Number</label>
                     <input type="text" name="phone" placeholder="e.g. +1 234 567 890" required>
                 </div>
-                <div>
-                    <label style="font-weight: 600;">Temporary Password</label>
+                <div class="form-group">
+                    <label>Temporary Password</label>
                     <input type="password" name="password" placeholder="Min 6 characters" required>
                 </div>
-                <div>
-                    <label style="font-weight: 600;">Assign Role</label>
+                <div class="form-group">
+                    <label>Assign Role</label>
                     <select name="role" required>
                         <option value="TRAINER">Trainer (Instructor)</option>
                         <option value="CUSTOMER">Student (Customer)</option>
@@ -37,24 +37,25 @@
                     </select>
                 </div>
             </div>
-            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee;">
-                <button type="submit" class="btn-success" style="padding: 12px 30px; font-weight: bold;">Create User Account</button>
+            <div style="margin-top: 10px; padding-top: 20px; border-top: 1px solid var(--gray-100);">
+                <button type="submit" class="btn btn-primary" style="padding: 12px 40px;">Create User Account</button>
             </div>
         </form>
     </section>
 
-    <!-- Section 2: User List Table -->
+    <!-- Section 2: User List -->
     <section class="card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h2>Active Members</h2>
-            <div class="filters" style="display: flex; gap: 10px;">
-                <a href="<%= tenantUrl('/users') %>" class="btn" style="padding: 5px 10px; font-size: 0.8rem; background: <%= !req.query.role ? 'var(--primary-color)' : '#999' %>">All</a>
-                <a href="<%= tenantUrl('/users?role=TRAINER') %>" class="btn" style="padding: 5px 10px; font-size: 0.8rem; background: <%= req.query.role === 'TRAINER' ? 'var(--primary-color)' : '#999' %>">Trainers</a>
-                <a href="<%= tenantUrl('/users?role=CUSTOMER') %>" class="btn" style="padding: 5px 10px; font-size: 0.8rem; background: <%= req.query.role === 'CUSTOMER' ? 'var(--primary-color)' : '#999' %>">Students</a>
-                <a href="<%= tenantUrl('/users?role=STAFF') %>" class="btn" style="padding: 5px 10px; font-size: 0.8rem; background: <%= req.query.role === 'STAFF' ? 'var(--primary-color)' : '#999' %>">Staff</a>
-                <a href="<%= tenantUrl('/users?role=COMPANY_ADMIN') %>" class="btn" style="padding: 5px 10px; font-size: 0.8rem; background: <%= req.query.role === 'COMPANY_ADMIN' ? 'var(--primary-color)' : '#999' %>">Admin</a>
-          </div>
-      </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+            <h2 style="font-size: 1.25rem;">Active Members</h2>
+            <div class="filters" style="display: flex; gap: 8px; background: var(--gray-100); padding: 5px; border-radius: 8px;">
+                <a href="<%= tenantUrl('/users') %>" class="btn" style="padding: 6px 15px; font-size: 0.8rem; background: <%= !req.query.role ? 'var(--white)' : 'transparent' %>; color: <%= !req.query.role ? 'var(--primary-color)' : 'var(--secondary-color)' %>; box-shadow: <%= !req.query.role ? 'var(--shadow)' : 'none' %>">All</a>
+                <a href="<%= tenantUrl('/users?role=TRAINER') %>" class="btn" style="padding: 6px 15px; font-size: 0.8rem; background: <%= req.query.role === 'TRAINER' ? 'var(--white)' : 'transparent' %>; color: <%= req.query.role === 'TRAINER' ? 'var(--primary-color)' : 'var(--secondary-color)' %>; box-shadow: <%= req.query.role === 'TRAINER' ? 'var(--shadow)' : 'none' %>">Trainers</a>
+                <a href="<%= tenantUrl('/users?role=CUSTOMER') %>" class="btn" style="padding: 6px 15px; font-size: 0.8rem; background: <%= req.query.role === 'CUSTOMER' ? 'var(--white)' : 'transparent' %>; color: <%= req.query.role === 'CUSTOMER' ? 'var(--primary-color)' : 'var(--secondary-color)' %>; box-shadow: <%= req.query.role === 'CUSTOMER' ? 'var(--shadow)' : 'none' %>">Students</a>
+                <a href="<%= tenantUrl('/users?role=STAFF') %>" class="btn" style="padding: 6px 15px; font-size: 0.8rem; background: <%= req.query.role === 'STAFF' ? 'var(--white)' : 'transparent' %>; color: <%= req.query.role === 'STAFF' ? 'var(--primary-color)' : 'var(--secondary-color)' %>; box-shadow: <%= req.query.role === 'STAFF' ? 'var(--shadow)' : 'none' %>">Staff</a>
+                <a href="<%= tenantUrl('/users?role=COMPANY_ADMIN') %>" class="btn" style="padding: 6px 15px; font-size: 0.8rem; background: <%= req.query.role === 'COMPANY_ADMIN' ? 'var(--white)' : 'transparent' %>; color: <%= req.query.role === 'COMPANY_ADMIN' ? 'var(--primary-color)' : 'var(--secondary-color)' %>; box-shadow: <%= req.query.role === 'COMPANY_ADMIN' ? 'var(--shadow)' : 'none' %>">Admin</a>
+            
+            </div>
+        </div>
 
         <div class="table-container">
             <table>
@@ -63,42 +64,40 @@
                         <th>Name & Contact</th>
                         <th>Role</th>
                         <th>Status</th>
-                        <th>Joined Date</th>
+                        <th>Joined</th>
                         <th style="text-align: right;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     <% if (users.length === 0) { %>
-                        <tr><td colspan="5" class="text-center" style="padding: 40px; color: #999;">No users found matching your criteria.</td></tr>
+                        <tr><td colspan="5" class="text-center" style="padding: 40px; color: var(--secondary-color);">No users found matching your criteria.</td></tr>
                     <% } %>
                     <% users.forEach(u => { %>
                         <tr>
                             <td>
                                 <div style="font-weight: 700;"><%= u.name %></div>
-                                <div style="font-size: 0.8rem; color: #666;"><%= u.email %></div>
-                                <div style="font-size: 0.8rem; color: var(--accent-color); font-weight: 600;"><%= u.phone || 'No Phone' %></div>
+                                <div style="font-size: 0.8rem; color: var(--secondary-color);"><%= u.email %></div>
+                                <div style="font-size: 0.8rem; color: var(--primary-color); font-weight: 600;"><%= u.phone || 'No Phone' %></div>
                             </td>
                             <td>
-                                <span class="badge badge-<%= u.role.toLowerCase() %>">
+                                <span class="badge" style="background: var(--gray-100); color: var(--gray-800); border: 1px solid var(--gray-200);">
                                     <%= u.role %>
                                 </span>
                             </td>
                             <td>
-                                <span style="color: <%= u.isActive ? 'var(--success-color)' : 'var(--danger-color)' %>; font-weight: 600;">
+                                <span style="color: <%= u.isActive ? 'var(--success-color)' : 'var(--danger-color)' %>; font-weight: 600; font-size: 0.85rem;">
                                     ● <%= u.isActive ? 'Active' : 'Inactive' %>
                                 </span>
                             </td>
-                            <td><small><%= new Date(u.createdAt).toLocaleDateString() %></small></td>
+                            <td><small style="color: var(--secondary-color);"><%= new Date(u.createdAt).toLocaleDateString() %></small></td>
                             <td style="text-align: right;">
-                                <a href="<%= tenantUrl('/users/edit/' + u._id) %>" class="btn" style="padding: 6px 15px; font-size: 0.8rem; background: var(--accent-color);">Edit Profile</a>
+                                <a href="<%= tenantUrl('/users/edit/' + u._id) %>" class="btn btn-outline" style="padding: 6px 12px; font-size: 0.8rem;">Edit Profile</a>
                             </td>
                         </tr>
                     <% }) %>
                 </tbody>
             </table>
         </div>
-
-        <!-- Modern Pagination Partial -->
         <%- include('../partials/pagination') %>
     </section>
 </div>

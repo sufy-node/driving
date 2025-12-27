@@ -1,74 +1,74 @@
 <div class="container">
-    <header class="mb-20" style="display: flex; justify-content: space-between; align-items: center;">
+    <header class="mb-20" style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
         <div>
-            <h1>School Configuration</h1>
-            <p>Manage branding and contact information for <strong><%= tenant.name %></strong></p>
+            <h1 style="font-size: 2rem; letter-spacing: -1px;">School Configuration</h1>
+            <p style="color: var(--secondary-color);">Manage branding and contact information</p>
         </div>
-        <a href="<%= tenantUrl('/dashboard') %>" class="btn">Back to Dashboard</a>
+        <a href="<%= tenantUrl('/dashboard') %>" class="btn btn-outline">Back</a>
     </header>
 
-    <div class="grid" style="grid-template-columns: 1.5fr 1fr; gap: 30px;">
+    <div class="grid" style="grid-template-columns: 1.6fr 1fr;">
         
         <section class="card">
             <form action="<%= tenantUrl('/settings/update') %>" method="POST">
-                <h3 style="margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px;">Visual Branding</h3>
+                <h3 style="margin-bottom: 25px; border-bottom: 1px solid var(--gray-100); padding-bottom: 10px;">Visual Branding</h3>
                 
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-                    <div>
+                <div class="grid" style="grid-template-columns: 1fr 1fr 1fr; margin-bottom: 25px;">
+                    <div class="form-group">
                         <label>Primary Color</label>
-                        <input type="color" name="primaryColor" value="<%= tenant.primaryColor %>" style="height: 50px; cursor: pointer;">
-                        <small style="color: #666;">Navbars & Main Buttons</small>
+                        <input type="color" name="primaryColor" value="<%= tenant.primaryColor %>" style="height: 50px; padding: 4px;">
                     </div>
-                    <div>
+                    <div class="form-group">
                         <label>Secondary Color</label>
-                        <input type="color" name="secondaryColor" value="<%= tenant.secondaryColor || '#64748b' %>" style="height: 50px; cursor: pointer;">
-                        <small style="color: #666;">Sidebars & Text</small>
+                        <input type="color" name="secondaryColor" value="<%= tenant.secondaryColor || '#64748b' %>" style="height: 50px; padding: 4px;">
                     </div>
-                    <div>
+                    <div class="form-group">
                         <label>Accent Color</label>
-                        <input type="color" name="accentColor" value="<%= tenant.accentColor || '#6366f1' %>" style="height: 50px; cursor: pointer;">
-                        <small style="color: #666;">Links & Highlights</small>
+                        <input type="color" name="accentColor" value="<%= tenant.accentColor || '#6366f1' %>" style="height: 50px; padding: 4px;">
                     </div>
                 </div>
 
-                <div style="margin-bottom: 20px;">
+                <div class="form-group">
                     <label>Driving School Name</label>
-                    <input type="text" name="name" value="<%= tenant.name %>" required style="width: 100%;">
+                    <input type="text" name="name" value="<%= tenant.name %>" required>
                 </div>
 
-                <h3 style="margin-top: 40px; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px;">Contact Details</h3>
+                <h3 style="margin-top: 40px; margin-bottom: 25px; border-bottom: 1px solid var(--gray-100); padding-bottom: 10px;">Contact Details</h3>
 
-                <div style="margin-bottom: 20px;">
-                    <label>Official Email</label>
-                    <input type="email" name="email" value="<%= tenant.settings?.email || '' %>" style="width: 100%;">
+                <div class="grid" style="grid-template-columns: 1fr 1fr;">
+                    <div class="form-group">
+                        <label>Official Email</label>
+                        <input type="email" name="email" value="<%= tenant.settings?.email || '' %>" placeholder="contact@school.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input type="text" name="phone" value="<%= tenant.settings?.phone || '' %>" placeholder="+1 234 567 890">
+                    </div>
                 </div>
 
-                <div style="margin-bottom: 20px;">
-                    <label>Phone Number</label>
-                    <input type="text" name="phone" value="<%= tenant.settings?.phone || '' %>" style="width: 100%;">
-                </div>
-
-                <div style="margin-bottom: 20px;">
+                <div class="form-group">
                     <label>Physical Address</label>
-                    <textarea name="address" rows="3" style="width: 100%;"><%= tenant.settings?.address || '' %></textarea>
+                    <textarea name="address" rows="3" placeholder="123 Driving Lane, City, Country"><%= tenant.settings?.address || '' %></textarea>
                 </div>
 
-                <button type="submit" class="btn-success" style="padding: 12px 30px; margin-top: 20px;">Save All Changes</button>
+                <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--gray-100);">
+                    <button type="submit" class="btn btn-primary" style="padding: 14px 40px;">Save All Changes</button>
+                </div>
             </form>
         </section>
 
-        <section style="display: flex; flex-direction: column; gap: 20px;">
-            <div class="card" style="background: #f8fafc; border: 1px dashed #cbd5e1;">
-                <h3>Theme Preview</h3>
-                <div style="margin-top: 20px;">
-                    <div style="background: var(--primary-color); color: white; padding: 10px; border-radius: 6px; text-align: center; margin-bottom: 10px;">
-                        Primary Element
-                    </div>
-                    <div style="background: var(--secondary-color); color: white; padding: 10px; border-radius: 6px; text-align: center; margin-bottom: 10px;">
-                        Secondary Element
-                    </div>
-                    <p style="color: var(--accent-color); font-weight: bold; text-align: center;">Accent Link Style</p>
+        <section style="display: flex; flex-direction: column; gap: 24px;">
+            <div class="card" style="background: var(--gray-100); border: 2px dashed var(--gray-300);">
+                <h3 style="margin-bottom: 15px;">Theme Preview</h3>
+                <p style="font-size: 0.85rem; color: var(--secondary-color); margin-bottom: 20px;">This is how your selected colors will appear to users.</p>
+                
+                <div style="background: var(--primary-color); color: white; padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 15px; font-weight: bold;">
+                    Primary Element (Navbar/Buttons)
                 </div>
+                <div style="background: var(--secondary-color); color: white; padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 15px; font-weight: bold;">
+                    Secondary Element (Headers)
+                </div>
+                <p style="color: var(--accent-color); font-weight: 800; text-align: center; font-size: 1.1rem;">Accent Link Style</p>
             </div>
         </section>
     </div>

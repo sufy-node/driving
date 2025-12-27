@@ -1,40 +1,54 @@
 <div class="container">
-    <header class="mb-20" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+    <header class="mb-20" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-top: 20px;">
         <div>
-            <h1>Training Progress & Ledger</h1>
-            <p>Student: <strong style="font-size: 1.2rem;"><%= enrollment.studentId.name %></strong></p>
+            <h1 style="font-size: 2rem; letter-spacing: -1px;">Training Progress Card</h1>
+            <p style="color: var(--secondary-color);">Student: <strong style="color: var(--gray-800);"><%= enrollment.studentId.name %></strong></p>
         </div>
         <div style="display: flex; gap: 10px;">
-            <button onclick="window.print()" class="btn" style="background: var(--secondary-color);">Print Card</button>
-            <a href="<%= tenantUrl('/enrollments') %>" class="btn">Back to List</a>
+            <button onclick="window.print()" class="btn btn-outline">Print Card</button>
+            <a href="<%= tenantUrl('/enrollments') %>" class="btn btn-primary">Back to List</a>
         </div>
     </header>
 
-    <div class="grid" style="grid-template-columns: 1.5fr 1fr; gap: 20px;">
-        <!-- Left: Plan Details -->
+    <div class="grid" style="grid-template-columns: 1.5fr 1fr;">
+        <!-- Plan Details -->
         <section class="card">
-            <h3>Plan Information</h3>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
-                <div><small style="color: #888;">COURSE</small><p><strong><%= enrollment.planDays %> Days</strong></p></div>
-                <div><small style="color: #888;">TRAINER</small><p><%= enrollment.trainerId.name %></p></div>
-                <div><small style="color: #888;">VEHICLE</small><p><%= enrollment.vehicleId.name %></p></div>
-                <div><small style="color: #888;">SLOT</small><p><%= enrollment.startTime %> - <%= enrollment.endTime %></p></div>
+            <h3 style="font-size: 1.1rem; margin-bottom: 20px;">Plan Information</h3>
+            <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <small style="color: var(--secondary-color); font-weight: bold; text-transform: uppercase; font-size: 0.7rem;">Course Type</small>
+                    <p style="font-weight: 600;"><%= enrollment.planDays %> Day Course</p>
+                </div>
+                <div>
+                    <small style="color: var(--secondary-color); font-weight: bold; text-transform: uppercase; font-size: 0.7rem;">Assigned Trainer</small>
+                    <p style="font-weight: 600;"><%= enrollment.trainerId.name %></p>
+                </div>
+                <div>
+                    <small style="color: var(--secondary-color); font-weight: bold; text-transform: uppercase; font-size: 0.7rem;">Vehicle</small>
+                    <p style="font-weight: 600;"><%= enrollment.vehicleId.name %> (<%= enrollment.vehicleId.plateNumber %>)</p>
+                </div>
+                <div>
+                    <small style="color: var(--secondary-color); font-weight: bold; text-transform: uppercase; font-size: 0.7rem;">Time Slot</small>
+                    <p style="font-weight: 600;"><%= enrollment.startTime %> - <%= enrollment.endTime %></p>
+                </div>
             </div>
         </section>
 
-        <!-- Right: Financial Summary -->
+        <!-- Financial Summary -->
         <section class="card" style="border-top: 4px solid var(--success-color);">
-            <h3>Financial Status</h3>
-            <div style="margin-top: 15px;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                    <span>Total Fees:</span> <strong>$<%= enrollment.totalPrice.toLocaleString() %></strong>
+            <h3 style="font-size: 1.1rem; margin-bottom: 20px;">Financial Summary</h3>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--secondary-color);">Total Fees:</span>
+                    <span style="font-weight: 700;">$<%= enrollment.totalPrice.toLocaleString() %></span>
                 </div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 5px; color: var(--success-color);">
-                    <span>Total Paid:</span> <strong>$<%= enrollment.totalPaid.toLocaleString() %></strong>
+                <div style="display: flex; justify-content: space-between; color: var(--success-color);">
+                    <span>Total Paid:</span>
+                    <span style="font-weight: 700;">$<%= enrollment.totalPaid.toLocaleString() %></span>
                 </div>
-                <hr style="margin: 10px 0; opacity: 0.2;">
+                <hr style="border: none; border-top: 1px solid var(--gray-100);">
                 <div style="display: flex; justify-content: space-between; font-size: 1.2rem;">
-                    <span>Balance Due:</span> 
+                    <span style="font-weight: 600;">Balance Due:</span>
                     <strong style="color: <%= enrollment.balance > 0 ? 'var(--danger-color)' : 'var(--success-color)' %>">
                         $<%= enrollment.balance.toLocaleString() %>
                     </strong>
@@ -43,67 +57,82 @@
         </section>
     </div>
 
-    <!-- Tabbed Section for Logs -->
-    <div style="margin-top: 30px;">
-        <div class="card">
-            <h2 style="margin-bottom: 20px;">Payment History (Ledger)</h2>
-            <div class="table-container">
-                <table>
-                    <thead>
+    <!-- Payment Ledger -->
+    <section class="card mt-30">
+        <h2 style="font-size: 1.25rem; margin-bottom: 20px;">Payment History</h2>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>Method</th>
+                        <th>Recorded By</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (payments.length === 0) { %>
+                        <tr><td colspan="5" class="text-center" style="padding: 30px; color: var(--secondary-color);">No payments recorded for this plan.</td></tr>
+                    <% } %>
+                    <% payments.forEach(p => { %>
                         <tr>
-                            <th>Date</th>
-                            <th>Amount</th>
-                            <th>Method</th>
-                            <th>Recorded By</th>
-                            <th>Notes</th>
+                            <td><%= new Date(p.paymentDate).toLocaleDateString() %></td>
+                            <td style="font-weight: 700; color: var(--success-color);">$<%= p.amount.toLocaleString() %></td>
+                            <td><span class="badge" style="background: var(--gray-100); color: var(--gray-800);"><%= p.method %></span></td>
+                            <td>
+                                <div style="font-weight: 600; font-size: 0.85rem;"><%= p.recordedBy?.name || 'System' %></div>
+                                <small style="color: var(--secondary-color); font-size: 0.7rem;"><%= p.recordedBy?.role %></small>
+                            </td>
+                            <td><small style="color: var(--secondary-color);"><%= p.notes || '-' %></small></td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        <% if (payments.length === 0) { %>
-                            <tr><td colspan="5" class="text-center">No payments recorded for this plan.</td></tr>
-                        <% } %>
-                        <% payments.forEach(p => { %>
-                            <tr>
-                                <td><%= new Date(p.paymentDate).toLocaleDateString() %></td>
-                                <td style="font-weight: bold; color: var(--success-color);">$<%= p.amount.toLocaleString() %></td>
-                                <td><span class="badge" style="background: #eee; color: #333;"><%= p.method %></span></td>
-                                <td><small><%= p.recordedBy?.name || 'System' %></small></td>
-                                <td><small><%= p.notes || '-' %></small></td>
-                            </tr>
-                        <% }) %>
-                    </tbody>
-                </table>
-            </div>
+                    <% }) %>
+                </tbody>
+            </table>
         </div>
+    </section>
 
-        <div class="card mt-20">
-            <h2 style="margin-bottom: 20px;">Attendance Log</h2>
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Day</th>
-                            <th>Date</th>
-                            <th>Status</th>
-                            <th>Trainer Feedback</th>
+    <!-- Attendance Log -->
+    <section class="card mt-30">
+        <h2 style="font-size: 1.25rem; margin-bottom: 20px;">Attendance Log (Digital Card)</h2>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Session #</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Trainer Feedback</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% sessions.forEach((session, index) => { %>
+                        <tr style="<%= session.status === 'ABSENT' ? 'background: #fff1f2;' : '' %>">
+                            <td><strong>Day <%= index + 1 %></strong></td>
+                            <td><%= new Date(session.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) %></td>
+                            <td>
+                                <span class="badge" style="background: <%= session.status === 'PRESENT' ? '#0df15b' : (session.status === 'ABSENT' ? '#fee2e2' : '#f1f5f9') %>; color: <%= session.status === 'PRESENT' ? '#166534' : (session.status === 'ABSENT' ? '#991b1b' : '#475569') %>;">
+                                    <%= session.status %>
+                                </span>
+                            </td>
+                            <td>
+                                <em style="color: var(--secondary-color); font-size: 0.85rem;">
+                                    <%= session.notes || 'No feedback provided' %>
+                                </em>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        <% sessions.forEach((session, index) => { %>
-                            <tr>
-                                <td><strong>Day <%= index + 1 %></strong></td>
-                                <td><%= new Date(session.date).toLocaleDateString() %></td>
-                                <td>
-                                    <span class="badge" style="background: <%= session.status === 'PRESENT' ? 'var(--success-color)' : (session.status === 'ABSENT' ? 'var(--danger-color)' : '#eee') %>; color: <%= session.status === 'PENDING' ? '#333' : '#fff' %>">
-                                        <%= session.status %>
-                                    </span>
-                                </td>
-                                <td><small><%= session.notes || 'No notes' %></small></td>
-                            </tr>
-                        <% }) %>
-                    </tbody>
-                </table>
-            </div>
+                    <% }) %>
+                </tbody>
+            </table>
         </div>
-    </div>
+    </section>
 </div>
+
+<style>
+    @media print {
+        nav, .btn, footer { display: none !important; }
+        .card { border: 1px solid #eee !important; box-shadow: none !important; margin-bottom: 10px !important; }
+        body { background: white !important; padding: 0 !important; }
+        .container { width: 100% !important; max-width: 100% !important; }
+    }
+</style>

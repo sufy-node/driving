@@ -3,10 +3,13 @@ import Enrollment from '../models/Enrollment.js';
 import { catchAsync, AppError } from '../utils/appError.js';
 
 /**
- * GET Daily Schedule
+ * GET Daily Schedule / Explorer
+ * Hardened for Trainer Privacy
  */
 export const getDailySchedule = catchAsync(async (req, res, next) => {
     const companyId = req.tenant._id;
+    
+    // 1. Handle Date Selection (Default to Today)
     const dateStr = req.query.date || new Date().toISOString().split('T')[0];
     const selectedDate = new Date(dateStr);
     selectedDate.setHours(0, 0, 0, 0);
@@ -14,24 +17,26 @@ export const getDailySchedule = catchAsync(async (req, res, next) => {
     const nextDay = new Date(selectedDate);
     nextDay.setDate(nextDay.getDate() + 1);
 
+    // 2. Build Secure Query
     const query = {
         companyId,
         date: { $gte: selectedDate, $lt: nextDay }
     };
 
+    // SECURITY: If user is a Trainer, force filter by their ID only
     if (req.user.role === 'TRAINER') {
         query.trainerId = req.user._id;
     }
 
     const sessions = await Session.find(query)
-        .populate('studentId', 'name')
+        .populate('studentId', 'name phone')
         .populate('trainerId', 'name')
         .populate('vehicleId', 'name plateNumber')
         .sort({ startTime: 1 })
         .lean();
 
     res.render('company/attendance', {
-        title: 'Daily Attendance',
+        title: 'Schedule Explorer',
         sessions,
         selectedDate: dateStr,
         tenant: req.tenant,
@@ -41,18 +46,23 @@ export const getDailySchedule = catchAsync(async (req, res, next) => {
 
 /**
  * POST Mark Attendance
+ * Includes Note saving for the Progress Card
  */
 export const markAttendance = catchAsync(async (req, res, next) => {
-    const { sessionId, status } = req.body;
+    const { sessionId, status, notes } = req.body;
     const companyId = req.tenant._id;
 
+    // Security: Ensure the session belongs to this company and (if trainer) this trainer
+    const sessionQuery = { _id: sessionId, companyId };
+    if (req.user.role === 'TRAINER') sessionQuery.trainerId = req.user._id;
+
     const session = await Session.findOneAndUpdate(
-        { _id: sessionId, companyId },
-        { status },
+        sessionQuery,
+        { status, notes: notes || "" },
         { new: true }
     );
 
-    if (!session) return next(new AppError('Session not found', 404));
+    if (!session) return next(new AppError('Session not found or unauthorized', 404));
 
     if (status === 'ABSENT') {
         const enrollment = await Enrollment.findById(session.enrollmentId);
@@ -82,35 +92,33 @@ export const markAttendance = catchAsync(async (req, res, next) => {
         await Enrollment.findByIdAndUpdate(session.enrollmentId, { $inc: { completedDays: 1 } });
     }
 
-    res.status(200).json({ success: true, message: 'Attendance updated' });
+    res.status(200).json({ success: true, message: 'Attendance recorded' });
 });
 
 /**
  * POST Reset Attendance
- * Reverts status to PENDING and cleans up plan extensions
  */
 export const resetAttendance = catchAsync(async (req, res, next) => {
     const { sessionId } = req.body;
     const companyId = req.tenant._id;
 
-    const session = await Session.findOne({ _id: sessionId, companyId });
+    const sessionQuery = { _id: sessionId, companyId };
+    if (req.user.role === 'TRAINER') sessionQuery.trainerId = req.user._id;
+
+    const session = await Session.findOne(sessionQuery);
     if (!session) return next(new AppError('Session not found', 404));
     
     const oldStatus = session.status;
     if (oldStatus === 'PENDING') return next(new AppError('Session is already pending', 400));
 
-    // 1. Revert Session Status
     session.status = 'PENDING';
     await session.save();
 
-    // 2. Revert Enrollment Progress
     if (oldStatus === 'PRESENT') {
         await Enrollment.findByIdAndUpdate(session.enrollmentId, { $inc: { completedDays: -1 } });
     } 
     
-    // 3. Remove the extra day if it was an absence
     if (oldStatus === 'ABSENT') {
-        // Find the very last session for this enrollment that is still PENDING
         const extraSession = await Session.findOne({ 
             enrollmentId: session.enrollmentId, 
             status: 'PENDING' 
@@ -121,5 +129,5 @@ export const resetAttendance = catchAsync(async (req, res, next) => {
         }
     }
 
-    res.status(200).json({ success: true, message: 'Session reset to pending' });
+    res.status(200).json({ success: true, message: 'Session reset' });
 });

@@ -1,91 +1,87 @@
 <div class="container">
-    <header class="mb-20" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+    <header class="mb-20" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-top: 20px;">
         <div>
-            <h1>Vehicle Fleet Management</h1>
-            <p>Manage cars available for training at <strong><%= tenant.name %></strong></p>
+            <h1 style="font-size: 2rem; letter-spacing: -1px;">Vehicle Fleet</h1>
+            <p style="color: var(--secondary-color);">Manage training vehicles for <strong><%= tenant.name %></strong></p>
         </div>
-        <a href="<%= tenantUrl('/dashboard') %>" class="btn">Back to Dashboard</a>
+        <a href="<%= tenantUrl('/dashboard') %>" class="btn btn-outline" style="border: 1px solid var(--gray-200);">Back to Dashboard</a>
     </header>
 
-    <div class="grid">
-        <!-- Add Vehicle Form -->
-        <section class="card">
-            <h2>Register New Vehicle</h2>
+    <div class="grid" style="grid-template-columns: 1.5fr 1fr;">
+        <!-- Section 1: Add Vehicle Form -->
+        <section class="card" style="border-top: 4px solid var(--primary-color);">
+            <h2 style="margin-bottom: 25px; font-size: 1.25rem;">Register New Vehicle</h2>
             <form action="<%= tenantUrl('/vehicles/add') %>" method="POST">
-                <div style="margin-bottom: 15px;">
-                    <label>Vehicle Name / Model</label>
-                    <input type="text" name="name" placeholder="e.g. Toyota Swift (Red)" required style="width: 100%;">
+                <div class="grid" style="grid-template-columns: 1fr 1fr;">
+                    <div class="form-group">
+                        <label>Vehicle Name / Model</label>
+                        <input type="text" name="name" placeholder="e.g. Toyota Swift (Red)" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Plate Number</label>
+                        <input type="text" name="plateNumber" placeholder="e.g. ABC-1234" required>
+                    </div>
                 </div>
-                
-                <div style="margin-bottom: 15px;">
-                    <label>Plate Number</label>
-                    <input type="text" name="plateNumber" placeholder="e.g. ABC-1234" required style="width: 100%;">
+                <div style="margin-top: 10px; padding-top: 20px; border-top: 1px solid var(--gray-100);">
+                    <button type="submit" class="btn btn-primary" style="padding: 12px 40px;">Add to Fleet</button>
                 </div>
-
-                <button type="submit" class="btn-success" style="width: 100%;">Add to Fleet</button>
             </form>
         </section>
 
-        <!-- Fleet Summary -->
+        <!-- Section 2: Fleet Summary -->
         <section class="card">
-            <h3>Fleet Status</h3>
-            <div style="display: flex; justify-content: space-around; margin-top: 20px; text-align: center;">
-                <div>
-                    <small>Total</small>
-                    <p style="font-size: 1.5rem; font-weight: bold;"><%= pagination.total %></p>
+            <h3 style="font-size: 1.1rem; margin-bottom: 20px;">Fleet Status</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; text-align: center;">
+                <div style="background: var(--gray-50); padding: 15px; border-radius: 8px;">
+                    <small style="color: var(--secondary-color); font-weight: bold; text-transform: uppercase; font-size: 0.7rem;">Total Cars</small>
+                    <p style="font-size: 1.8rem; font-weight: 800; margin-top: 5px;"><%= pagination.total %></p>
                 </div>
-                <div>
-                    <small>Active</small>
-                    <p style="font-size: 1.5rem; font-weight: bold; color: var(--success-color);">
+                <div style="background: #ecfdf5; padding: 15px; border-radius: 8px;">
+                    <small style="color: var(--success-color); font-weight: bold; text-transform: uppercase; font-size: 0.7rem;">Active</small>
+                    <p style="font-size: 1.8rem; font-weight: 800; margin-top: 5px; color: var(--success-color);">
                         <%= vehicles.filter(v => v.isActive).length %>
                     </p>
                 </div>
-                <div>
-                    <small>Inactive</small>
-                    <p style="font-size: 1.5rem; font-weight: bold; color: var(--danger-color);">
-                        <%= vehicles.filter(v => !v.isActive).length %>
-                    </p>
-                </div>
             </div>
-            <hr style="margin: 20px 0;">
-            <p style="font-size: 0.85rem; color: #666;">Note: Only active vehicles can be assigned to new student enrollments.</p>
+            <p style="margin-top: 20px; font-size: 0.85rem; color: var(--secondary-color); line-height: 1.4;">
+                * Only active vehicles can be assigned to new student training plans.
+            </p>
         </section>
     </div>
 
-    <section class="card">
-        <h2>Registered Vehicles</h2>
+    <!-- Section 3: Vehicle List -->
+    <section class="card mt-30">
+        <h2 style="margin-bottom: 20px; font-size: 1.25rem;">Registered Vehicles</h2>
         <div class="table-container">
             <table>
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Vehicle Name</th>
+                        <th>Vehicle Details</th>
                         <th>Plate Number</th>
                         <th>Status</th>
-                        <th>Actions</th>
+                        <th style="text-align: right;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     <% if (vehicles.length === 0) { %>
-                        <tr><td colspan="5" class="text-center">No vehicles registered yet.</td></tr>
+                        <tr><td colspan="5" class="text-center" style="padding: 40px; color: var(--secondary-color);">No vehicles registered yet.</td></tr>
                     <% } %>
                     <% vehicles.forEach(v => { %>
                         <tr>
-                            <td><code>#<%= v._id %></code></td>
+                            <td><code style="font-size: 0.8rem; color: #888;">#<%= v._id %></code></td>
                             <td><strong><%= v.name %></strong></td>
-                            <td><code><%= v.plateNumber %></code></td>
+                            <td><code style="background: var(--gray-100); padding: 2px 6px; border-radius: 4px;"><%= v.plateNumber %></code></td>
                             <td>
-                                <span class="badge" style="background: <%= v.isActive ? 'var(--success-color)' : 'var(--danger-color)' %>; color: white;">
+                                <span class="badge" style="background: <%= v.isActive ? '#dcfce7' : '#fee2e2' %>; color: <%= v.isActive ? '#166534' : '#991b1b' %>;">
                                     <%= v.isActive ? 'Active' : 'Inactive' %>
                                 </span>
                             </td>
-                            <td>
-                                <div style="display: flex; gap: 5px;">
-                                    <a href="<%= tenantUrl('/vehicles/edit/' + v._id) %>" class="btn" style="padding: 5px 10px; font-size: 0.8rem; background: var(--accent-color);">Edit</a>
+                            <td style="text-align: right;">
+                                <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                                    <a href="<%= tenantUrl('/vehicles/edit/' + v._id) %>" class="btn btn-outline" style="padding: 6px 12px; font-size: 0.8rem;">Edit</a>
                                     <form action="<%= tenantUrl('/vehicles/toggle/' + v._id) %>" method="POST" style="display:inline;">
-                                        <button type="submit" class="btn" style="padding: 5px 10px; font-size: 0.8rem; background: #666;">
-                                            Toggle
-                                        </button>
+                                        <button type="submit" class="btn" style="padding: 6px 12px; font-size: 0.8rem; background: var(--gray-800); color: white;">Toggle</button>
                                     </form>
                                 </div>
                             </td>
@@ -94,8 +90,6 @@
                 </tbody>
             </table>
         </div>
-
-        <!-- Modern Pagination Partial -->
         <%- include('../partials/pagination') %>
     </section>
 </div>

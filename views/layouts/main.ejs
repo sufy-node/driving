@@ -4,13 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title><%= title %> | Driving SaaS Pro</title>
-    
-    <!-- Fonts & Icons -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="stylesheet" href="/css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
     <style>
         :root {
             --primary-color: <%= (locals.tenant && tenant.primaryColor) ? tenant.primaryColor : '#2563eb' %>;
@@ -22,15 +18,10 @@
 <body>
     <nav>
         <div class="container">
-            <a href="/" class="nav-brand">
-                DRIVE<strong>SAAS</strong> <span>PRO</span>
-            </a>
+            <a href="/" class="nav-brand">DRIVE<strong>SAAS</strong> <span>PRO</span></a>
 
-            <!-- Hamburger Icon for Mobile -->
             <div class="menu-toggle" id="mobile-menu">
-                <span></span>
-                <span></span>
-                <span></span>
+                <span></span><span></span><span></span>
             </div>
 
             <div class="nav-links" id="nav-list">
@@ -42,10 +33,13 @@
 
                     <% if (locals.tenant && typeof tenantUrl !== 'undefined') { %>
                         
+                        <!-- Trainer Navigation -->
                         <% if (user.role === 'TRAINER') { %>
-                            <a href="<%= tenantUrl('/trainer/dashboard') %>">My Schedule</a>
+                            <a href="<%= tenantUrl('/trainer/dashboard') %>">Today's Tasks</a>
+                            <a href="<%= tenantUrl('/attendance') %>">Schedule Explorer</a>
                         <% } %>
 
+                        <!-- Admin Navigation -->
                         <% if (user.role === 'COMPANY_ADMIN' || user.role === 'SUPER_ADMIN') { %>
                             <a href="<%= tenantUrl('/dashboard') %>">Dashboard</a>
                             <a href="<%= tenantUrl('/attendance') %>">Attendance</a>
@@ -79,31 +73,21 @@
     </footer>
 
     <script>
-        // --- Mobile Menu Logic ---
         const menuToggle = document.getElementById('mobile-menu');
         const navList = document.getElementById('nav-list');
-
         menuToggle.addEventListener('click', () => {
             navList.classList.toggle('active');
-            // Animate hamburger to X
-            const spans = menuToggle.getElementsByTagName('span');
-            spans[0].style.transform = navList.classList.contains('active') ? 'rotate(45deg) translate(5px, 5px)' : '';
-            spans[1].style.opacity = navList.classList.contains('active') ? '0' : '1';
-            spans[2].style.transform = navList.classList.contains('active') ? 'rotate(-45deg) translate(7px, -6px)' : '';
         });
 
-        // --- Notification System ---
         const Toast = Swal.mixin({
             toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, timerProgressBar: true
         });
 
         const successMsg = "<%= success %>";
         const errorMsg = "<%= error %>";
-
         if (successMsg && successMsg !== 'null' && successMsg !== 'undefined') Toast.fire({ icon: 'success', title: successMsg });
         if (errorMsg && errorMsg !== 'null' && errorMsg !== 'undefined') Toast.fire({ icon: 'error', title: errorMsg });
 
-        // Clean URL
         if (window.history.replaceState) {
             const url = new URL(window.location);
             url.searchParams.delete('success');
